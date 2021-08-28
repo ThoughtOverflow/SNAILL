@@ -48,12 +48,45 @@ ASNAILLPlayerController::ASNAILLPlayerController()
          		if (bShow)
          		{
          			PlayerSelectionWidget->AddToViewport();
+         			bShowMouseCursor = true;
+         			SetInputMode(FInputModeUIOnly());
          		}
          		else
          		{
          			PlayerSelectionWidget->RemoveFromParent();
+         			bShowMouseCursor = false;
+         			SetInputMode(FInputModeGameOnly());
          		}
 	}
+}
+
+void ASNAILLPlayerController::TogglePlayerDeathScreen(bool bShow)
+{
+	if (!PlayerDeath) return;
+	if (!PlayerDeathWidget)
+	{
+		PlayerDeathWidget = CreateWidget<class UPlayerDeathWidget>(GetWorld(), PlayerDeath);
+	}
+	if (IsLocalController())
+	{
+		if (bShow)
+		{
+			PlayerDeathWidget->AddToViewport();
+			bShowMouseCursor = true;
+			SetInputMode(FInputModeUIOnly());
+		}
+		else
+		{
+			PlayerDeathWidget->RemoveFromParent();
+			bShowMouseCursor = false;
+			SetInputMode(FInputModeGameOnly());
+		}
+	}
+}
+
+void ASNAILLPlayerController::ShowGameEndScreen(bool bIsWinningTeam)
+{
+	Client_DisplayEndGameWidget(bIsWinningTeam);
 }
 
 void ASNAILLPlayerController::BeginPlay()
@@ -82,6 +115,39 @@ void ASNAILLPlayerController::InitPossess()
 			Possess(ToPossess);
 		}
 	}
+}
+
+void ASNAILLPlayerController::Client_DisplayEndGameWidget_Implementation(bool bIsWinningTeam)
+{
+	if (!GameEnd) return;
+	if (!GameEndWidget)
+	{
+		GameEndWidget = CreateWidget<class UGameEndWidget>(GetWorld(), GameEnd);
+	}
+	if (IsLocalController())
+	{
+		if (bIsWinningTeam)
+		{
+			GameEndWidget->AddToViewport();
+			bShowMouseCursor = true;
+			SetInputMode(FInputModeUIOnly());
+			GameEndWidget->bIsWinningTeam = true;
+			GameEndWidget->RefreshWidget();
+		}
+		else
+		{
+			GameEndWidget->AddToViewport();
+			bShowMouseCursor = true;
+			SetInputMode(FInputModeUIOnly());
+			GameEndWidget->bIsWinningTeam = false;
+			GameEndWidget->RefreshWidget();
+		}
+	}
+}
+
+void ASNAILLPlayerController::RespawnPlayer_Implementation()
+{
+	Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->Respawn(this);
 }
 
 void ASNAILLPlayerController::SelectTeam_Implementation(EGameTeams Team, ASNAILLPlayerController* PlayerController)

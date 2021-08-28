@@ -46,6 +46,30 @@ void ASNAILLGameState::OnRep_TeamBKillScore()
 	OnPlayerHUDWidgetRefreshRequestCreated.Broadcast();
 }
 
+void ASNAILLGameState::RefreshPlayerScoreIndicatorForServer()
+{
+	OnRep_TeamAKillScore();
+	OnRep_TeamBKillScore();
+}
+
+EGameTeams ASNAILLGameState::GetPlayerTeam(ASNAILLPlayerController* Player)
+{
+		
+		if(TeamAPlayers.Contains(Player)) {
+		
+			return EGameTeams::EGT_TeamA;
+		
+		}else if(TeamBPlayers.Contains(Player)) {
+		
+			return EGameTeams::EGT_TeamB;
+		
+		}else {
+			return EGameTeams::EGT_TeamNone;
+		}
+	
+}
+
+
 void ASNAILLGameState::Client_RefreshTeamSelectionWidget_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ITRAN"));

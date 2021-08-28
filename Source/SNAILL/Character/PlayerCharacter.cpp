@@ -2,10 +2,14 @@
 
 
 #include "PlayerCharacter.h"
+
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "SNAILL/Components/InteractionComponent.h"
-#include "SNAILL/Framework/SNAILLGameState.h"
+#include "Net/UnrealNetwork.h"
+#include "SNAILL/Framework/SNAILLGameMode.h"
+#include "SNAILL/Framework/SNAILLPlayerState.h"
 
 FInteractionData::FInteractionData()
 {
@@ -26,9 +30,10 @@ APlayerCharacter::APlayerCharacter()
 	AirControlWhileBoosted = 0.4f;
 
 	playerMaxHealth = 100.f;
-	playerHealth = 50.f;
+	playerHealth = 100.f;
 
 	bSprayAvailable = false;
+	bIsPlayerDead = false;
 
 	//----------------COMPONENT INITIALIZATION------------
 
@@ -55,6 +60,15 @@ void APlayerCharacter::BeginPlay()
 	
 }
 
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerCharacter, playerHealth);
+	DOREPLIFETIME(APlayerCharacter, playerMaxHealth);
+	DOREPLIFETIME(APlayerCharacter, bIsPlayerDead);
+	
+}
 
 
 // Called every frame
@@ -263,6 +277,61 @@ void APlayerCharacter::Server_BeginShooting_Implementation()
 	BeginShooting();
 }
 
+
+void APlayerCharacter::SelectDefWeaponTMP()
+{
+	SelectWeapon(WeaponToAdd);
+}
+
+void APlayerCharacter::OnRep_PlayerHealth()
+{
+	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
+	{
+		if(PlayerController->PlayerBasicUIWidget)
+		{
+			PlayerController->PlayerBasicUIWidget->PlayerHealth = playerHealth;
+			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
+			PlayerController->PlayerBasicUIWidget->RefreshWidget();
+			UE_LOG(LogTemp, Error, TEXT("HP: %f"), playerHealth);
+		}
+	}
+}
+
+void APlayerCharacter::OnRep_PlayerMaxHealth()
+{
+	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
+	{
+		if(PlayerController->PlayerBasicUIWidget)
+		{
+			PlayerController->PlayerBasicUIWidget->PlayerHealth = playerHealth;
+			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
+			PlayerController->PlayerBasicUIWidget->RefreshWidget();
+			UE_LOG(LogTemp, Error, TEXT("HP: %f"), playerHealth);
+		}
+	}
+}
+
+void APlayerCharacter::OnRep_IsPlayerDead()
+{
+	if(bIsPlayerDead)
+	{
+		GetMesh()->SetSimulatePhysics(true);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
+		{
+			PlayerController->ToggleBasicUI(false);
+			PlayerController->TogglePlayerDeathScreen(true);
+			if(PlayerController->PlayerDeathWidget)
+			{
+				PlayerController->PlayerDeathWidget->KillerName = Cast<ASNAILLPlayerState>( GetPlayerState())->GetPlayerName();
+				PlayerController->PlayerDeathWidget->currentKills = Cast<ASNAILLPlayerState>( GetPlayerState())->PlayerCurrentKills;
+				PlayerController->PlayerDeathWidget->RefreshWidget();
+			}
+				
+		}
+	}
+}
+
 // Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -306,6 +375,33 @@ void APlayerCharacter::SelectWeapon(TSubclassOf<AWeaponBase> WeaponToSelect)
 	}
 }
 
+void APlayerCharacter::SetPlayerHealth(float newHealth)
+{
+	if(HasAuthority())
+	{
+		float h = FMath::Clamp(newHealth, 0.f, playerMaxHealth);
+		playerHealth = h;
+		OnRep_PlayerHealth();
+		if(playerHealth == 0)
+		{
+			//TODO: Player Death Logic;
+			UE_LOG(LogTemp, Error, TEXT("URDEAD"));
+			bIsPlayerDead = true;
+			OnRep_IsPlayerDead();
+			Cast<ASNAILLPlayerState>(GetPlayerState())->PlayerCurrentKills = 0;
+			
+		}
+	}
+}
+
+void APlayerCharacter::ChangePlayerHealth(float deltaHealth)
+{
+	if(HasAuthority())
+	{
+		SetPlayerHealth(GetPlayerHealth() + deltaHealth);
+	}
+}
+
 void APlayerCharacter::DisplayBasicUI_Implementation()
 {
 	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
@@ -328,7 +424,7 @@ void APlayerCharacter::Server_TMP_Implementation()
 		GS->TeamBKillScore++;
 	}*/
 
-	SelectWeapon(WeaponToAdd);
+	
 	
 }
 

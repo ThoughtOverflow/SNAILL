@@ -42,6 +42,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void JoinTeam(EGameTeams Team, ASNAILLPlayerController* Player);
+	UFUNCTION(BlueprintCallable)
+		void ProjectileHit(AActor* Shooter, AActor* Target, int32 DamageToDeal, bool bCanProjectileDamageAllies);
+	UFUNCTION(BlueprintCallable)
+		void Respawn(ASNAILLPlayerController* PlayerToRespawn);
+	UFUNCTION(BlueprintCallable)
+		void EndGame(EGameTeams WinningTeam);
 	
 	
 };

@@ -52,14 +52,12 @@ public:
 	float AirControlWhileBoosted;
 	UPROPERTY(BlueprintReadWrite)
 	FInteractionData InteractionData;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Player Properties")
-	float playerHealth;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
-	float playerMaxHealth;
 	UPROPERTY(BlueprintReadWrite, VisibleDefaultsOnly)
 	class ASNAILLPlayerController* PC;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		bool bSprayAvailable;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_IsPlayerDead)
+		bool bIsPlayerDead;
 
 	//Weapon Stuff:
 
@@ -72,6 +70,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION()
 		void TrySpray();
@@ -100,6 +100,11 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		ASNAILLPlayerController* TryGetPlayerController();
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Player Properties", ReplicatedUsing = OnRep_PlayerHealth)
+	float playerHealth;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, ReplicatedUsing = OnRep_PlayerMaxHealth)
+	float playerMaxHealth;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -114,6 +119,16 @@ public:
 		void Server_TrySpray();
 	UFUNCTION(Server, Reliable)
 		void Server_BeginShooting();
+
+	UFUNCTION()
+		void SelectDefWeaponTMP();
+
+	UFUNCTION()
+		void OnRep_PlayerHealth();
+	UFUNCTION()
+		void OnRep_PlayerMaxHealth();
+	UFUNCTION()
+		void OnRep_IsPlayerDead();
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -130,6 +145,14 @@ public:
 		
 	UFUNCTION(Client, Reliable)
 		void DisplayBasicUI();
+
+	UFUNCTION(BlueprintCallable)
+		void SetPlayerHealth(float newHealth);
+	UFUNCTION(BlueprintCallable)
+		void ChangePlayerHealth(float deltaHealth);
+	UFUNCTION(BlueprintGetter)
+		FORCEINLINE float GetPlayerHealth() {return  playerHealth;};
+		
 
 	
 

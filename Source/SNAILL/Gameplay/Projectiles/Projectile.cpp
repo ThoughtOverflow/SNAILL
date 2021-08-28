@@ -3,6 +3,9 @@
 
 #include "Projectile.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "SNAILL/Framework/SNAILLGameMode.h"
+
 // Sets default values
 AProjectile::AProjectile()
 {
@@ -13,8 +16,10 @@ AProjectile::AProjectile()
 	WeaponBase = nullptr;
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollider"));
+	//SphereCollision->SetCollisionObjectType(ECC_GameTraceChannel1);
 	SphereCollision->SetSphereRadius(10.f);
 	SphereCollision->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnImpact);
+	SphereCollision->OnComponentHit.AddDynamic(this, &AProjectile::OnBlock);
 	SetRootComponent(SphereCollision);
 	SphereCollision->SetGenerateOverlapEvents(true);
 	SphereCollision->SetNotifyRigidBodyCollision(true);
@@ -27,6 +32,9 @@ AProjectile::AProjectile()
     ProjectileMovementComponent->bShouldBounce = false;
     ProjectileMovementComponent->Bounciness = 0.3f;
     ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+	
+	bCanDamageAllies = false;
+	projectileDamage = 22;
 
 }
 
@@ -34,33 +42,31 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AProjectile::OnImpact(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
-	if(!HasAuthority())
-	{
-		Server_OnImpact(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-	}else
-	{
-		 if(WeaponBase)
-        	 {
-        		//OtherActor->Destroy();
-        		//Destroy();
-        		UE_LOG(LogTemp, Warning, TEXT("Damaging: %s"), *OtherActor->GetName());
-        	 }
-	}
-	
+		if(HasAuthority())
+		{
+			if(WeaponBase && OtherActor != GetInstigator())
+			{
+					//OtherActor->Destroy();
+					//Destroy();
+					UE_LOG(LogTemp, Warning, TEXT("Calling Damage Handler"));
+					Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), OtherActor, projectileDamage, bCanDamageAllies);
+					this->Destroy();	
+			}
+		}	 
 	
 }
 
-void AProjectile::Server_OnImpact_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AProjectile::OnBlock(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse, const FHitResult& Hit)
 {
-	OnImpact(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+	UE_LOG(LogTemp, Warning, TEXT("Block Destroy"));
+	this->Destroy();
 }
 
 // Called every frame
@@ -69,4 +75,6 @@ void AProjectile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+
 

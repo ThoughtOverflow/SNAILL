@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "SNAILL/Gameplay/Enums/EGameTeams.h"
+
 #include "SNAILLGameState.generated.h"
 
 /**
@@ -55,6 +57,10 @@ protected:
 public:
 
 	UFUNCTION(Client, Unreliable)
-			void Client_RefreshTeamSelectionWidget();
-	
+		void Client_RefreshTeamSelectionWidget();
+	UFUNCTION(BlueprintCallable)
+		void RefreshPlayerScoreIndicatorForServer();
+	//Weird Server Move:
+	UFUNCTION(BlueprintCallable)
+		EGameTeams GetPlayerTeam(ASNAILLPlayerController* Player);
 };

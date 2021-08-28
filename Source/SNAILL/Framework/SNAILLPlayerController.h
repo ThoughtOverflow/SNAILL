@@ -7,6 +7,9 @@
 #include "SNAILL/Gameplay/Enums/EGameTeams.h"
 #include "SNAILL/UMG/UserWidgets/PlayerDefaultHUD.h"
 #include "SNAILL/UMG/UserWidgets/TeamSelectionWidget.h"
+#include "SNAILL/UMG/UserWidgets/PlayerDeathWidget.h"
+#include "SNAILL/UMG/UserWidgets/GameEndWidget.h"
+
 #include "SNAILLPlayerController.generated.h"
 
 /**
@@ -33,11 +36,25 @@ class SNAILL_API ASNAILLPlayerController : public APlayerController
 	TSubclassOf<UTeamSelectionWidget> PlayerSelection;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
 	UTeamSelectionWidget* PlayerSelectionWidget;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UPlayerDeathWidget> PlayerDeath;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+	UPlayerDeathWidget* PlayerDeathWidget;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UGameEndWidget> GameEnd;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+	UGameEndWidget* GameEndWidget;
 
 	UFUNCTION(BlueprintCallable)
 		void ToggleBasicUI(bool bIsVisible);
 	UFUNCTION(BlueprintCallable)
 		void ToggleTeamSelectionScreen(bool bShow);
+	UFUNCTION(BlueprintCallable)
+		void TogglePlayerDeathScreen(bool bShow);
+	UFUNCTION(BlueprintCallable)
+		void ShowGameEndScreen(bool bIsWinningTeam);
+	UFUNCTION(Client, Reliable)
+	void Client_DisplayEndGameWidget(bool bIsWinningTeam);
 
 protected:
 
@@ -50,5 +67,9 @@ protected:
 		
 	UFUNCTION(BlueprintCallable, Server, Reliable)
 		void SelectTeam(EGameTeams Team, ASNAILLPlayerController* PlayerController);
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+		void RespawnPlayer();
+
+
 	
 };

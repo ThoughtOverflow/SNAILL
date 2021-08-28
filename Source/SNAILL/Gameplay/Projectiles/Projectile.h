@@ -30,6 +30,10 @@ public:
 		float ProjectileSpeed;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile Properties")
 		AWeaponBase* WeaponBase;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile Properties")
+		bool bCanDamageAllies;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile Properties")
+		int32 projectileDamage;
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,12 +41,12 @@ protected:
 
 	UFUNCTION()
 	virtual void OnImpact(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-	UFUNCTION(Server, Reliable)
-	void Server_OnImpact(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	UFUNCTION()
+	virtual void OnBlock(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit );
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
 
 };

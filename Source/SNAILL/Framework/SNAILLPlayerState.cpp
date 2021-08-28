@@ -2,4 +2,19 @@
 
 
 #include "SNAILLPlayerState.h"
+#include "Net/UnrealNetwork.h"
 
+ASNAILLPlayerState::ASNAILLPlayerState()
+{
+	PlayerName = "DefaultName_SryNotYetImplemented";
+	PlayerCurrentKills = 0;
+}
+
+void ASNAILLPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASNAILLPlayerState, PlayerName);
+	DOREPLIFETIME(ASNAILLPlayerState, PlayerCurrentKills);
+	
+}
