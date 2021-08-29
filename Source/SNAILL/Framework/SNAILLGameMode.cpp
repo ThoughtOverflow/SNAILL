@@ -52,6 +52,7 @@ void ASNAILLGameMode::JoinTeam(EGameTeams Team, ASNAILLPlayerController* Player)
 				Player->ClientSetRotation(SelectedStart->GetActorRotation());
 				APlayerCharacter* SpawnedPlayer = GetWorld()->SpawnActor<APlayerCharacter>(TeamBCharacter, SelectedStart->GetActorLocation(), SelectedStart->GetActorRotation());
 				Player->Possess(SpawnedPlayer);
+				SpawnedPlayer->SelectDefWeaponTMP();
 				SpawnedPlayer->DisplayBasicUI();
 			}
 		}
@@ -100,6 +101,9 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 						case EGameTeams::EGT_TeamNone:
 						break;
 					}
+					Cast<ASNAILLPlayerState>(ShooterPlayer->GetPlayerState())->PlayerCurrentKills++;
+					KilledPlayer->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+					
 				}
 				
 			}else
@@ -109,7 +113,8 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 					TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
 					EGameTeams Team = SnailGameState->GetPlayerTeam(Cast<ASNAILLPlayerController>(ShooterPlayer->GetController()));
 					APlayerCharacter* KilledPlayer = Cast<APlayerCharacter>(Target);
-
+					KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->KillerName = ShooterPlayer->GetPlayerState<ASNAILLPlayerState>()->GetPlayerName();
+					UE_LOG(LogTemp, Warning, TEXT("SET PLAYER STATE VAR"));
 					//Double Check Kill Boolean:
 					if(KilledPlayer->bIsPlayerDead)
 					{
@@ -151,10 +156,10 @@ void ASNAILLGameMode::Respawn(ASNAILLPlayerController* PlayerToRespawn)
 {
 	
 	PlayerToRespawn->GetPawn()->Destroy();
-	if(PlayerToRespawn->GetPawn())
-	{
-		PlayerToRespawn->UnPossess();
-	}
+	//if(PlayerToRespawn->GetPawn())
+	//{
+		//PlayerToRespawn->UnPossess();
+	//}
 
 	SnailGameState = GetGameState<ASNAILLGameState>();
 	TArray<AActor*> TeamStart;
@@ -180,6 +185,7 @@ void ASNAILLGameMode::Respawn(ASNAILLPlayerController* PlayerToRespawn)
 		APlayerCharacter* SpawnedPlayer = GetWorld()->SpawnActor<APlayerCharacter>(TeamCharacter, SelectedStart->GetActorLocation(), SelectedStart->GetActorRotation());
 		SpawnedPlayer->bIsPlayerDead = false;
 		PlayerToRespawn->Possess(SpawnedPlayer);
+		SpawnedPlayer->SelectDefWeaponTMP();
 		SpawnedPlayer->DisplayBasicUI();
 	}
 }
@@ -193,13 +199,15 @@ void ASNAILLGameMode::EndGame(EGameTeams WinningTeam)
 	{
 		for(ASNAILLPlayerController* Controller : GetGameState<ASNAILLGameState>()->TeamAPlayers)
 		{
-			Controller->UnPossess();
+			Controller->ClientIgnoreLookInput(true);
+			Controller->ClientIgnoreMoveInput(true);
 			Controller->TogglePlayerDeathScreen(false);
 			Controller->ShowGameEndScreen(true);
 		}
 		for(ASNAILLPlayerController* Controller : GetGameState<ASNAILLGameState>()->TeamBPlayers)
 		{
-			Controller->UnPossess();
+			Controller->ClientIgnoreLookInput(true);
+			Controller->ClientIgnoreMoveInput(true);
 			Controller->TogglePlayerDeathScreen(false);
 			Controller->ShowGameEndScreen(false);
 		}
@@ -207,13 +215,15 @@ void ASNAILLGameMode::EndGame(EGameTeams WinningTeam)
 	{
 		for(ASNAILLPlayerController* Controller : GetGameState<ASNAILLGameState>()->TeamAPlayers)
 		{
-			Controller->UnPossess();
+			Controller->ClientIgnoreLookInput(true);
+			Controller->ClientIgnoreMoveInput(true);
 			Controller->TogglePlayerDeathScreen(false);
 			Controller->ShowGameEndScreen(false);
 		}
 		for(ASNAILLPlayerController* Controller : GetGameState<ASNAILLGameState>()->TeamBPlayers)
 		{
-			Controller->UnPossess();
+			Controller->ClientIgnoreLookInput(true);
+			Controller->ClientIgnoreMoveInput(true);
 			Controller->TogglePlayerDeathScreen(false);
 			Controller->ShowGameEndScreen(true);
 		}

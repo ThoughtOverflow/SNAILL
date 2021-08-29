@@ -41,6 +41,7 @@ APlayerCharacter::APlayerCharacter()
 	PlayerCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "head");
 	PlayerCamera->SetRelativeRotation(FRotator(0.0f,90.f,-90.f));
 	PlayerCamera->bUsePawnControlRotation = true;
+	PlayerCamera->SetFieldOfView(90);
 
 	//----------------------------------------------------
 	
@@ -323,7 +324,8 @@ void APlayerCharacter::OnRep_IsPlayerDead()
 			PlayerController->TogglePlayerDeathScreen(true);
 			if(PlayerController->PlayerDeathWidget)
 			{
-				PlayerController->PlayerDeathWidget->KillerName = Cast<ASNAILLPlayerState>( GetPlayerState())->GetPlayerName();
+				UE_LOG(LogTemp, Warning, TEXT("KILLERNAME: %s"), *GetController()->GetPlayerState<ASNAILLPlayerState>()->KillerName);
+				PlayerController->PlayerDeathWidget->KillerName = GetPlayerState<ASNAILLPlayerState>()->KillerName;
 				PlayerController->PlayerDeathWidget->currentKills = Cast<ASNAILLPlayerState>( GetPlayerState())->PlayerCurrentKills;
 				PlayerController->PlayerDeathWidget->RefreshWidget();
 			}
@@ -388,7 +390,7 @@ void APlayerCharacter::SetPlayerHealth(float newHealth)
 			UE_LOG(LogTemp, Error, TEXT("URDEAD"));
 			bIsPlayerDead = true;
 			OnRep_IsPlayerDead();
-			Cast<ASNAILLPlayerState>(GetPlayerState())->PlayerCurrentKills = 0;
+			// Cast<ASNAILLPlayerState>(GetPlayerState())->PlayerCurrentKills = 0;
 			
 		}
 	}

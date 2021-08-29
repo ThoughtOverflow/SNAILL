@@ -8,6 +8,7 @@ ASNAILLPlayerState::ASNAILLPlayerState()
 {
 	PlayerName = "DefaultName_SryNotYetImplemented";
 	PlayerCurrentKills = 0;
+	KillerName = "NOBODY";
 }
 
 void ASNAILLPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -16,5 +17,6 @@ void ASNAILLPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 
 	DOREPLIFETIME(ASNAILLPlayerState, PlayerName);
 	DOREPLIFETIME(ASNAILLPlayerState, PlayerCurrentKills);
+	DOREPLIFETIME(ASNAILLPlayerState, KillerName);
 	
 }

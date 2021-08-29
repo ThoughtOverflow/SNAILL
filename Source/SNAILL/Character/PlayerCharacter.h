@@ -104,6 +104,7 @@ protected:
 	float playerHealth;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, ReplicatedUsing = OnRep_PlayerMaxHealth)
 	float playerMaxHealth;
+	
 
 public:	
 	// Called every frame

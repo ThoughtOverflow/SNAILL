@@ -11,7 +11,7 @@ ASNAILLGameState::ASNAILLGameState()
 {
 	TeamAKillScore = 0;
 	TeamBKillScore = 0;
-	MaxKillCountToWin = 50;
+	MaxKillCountToWin = 30;
 }
 
 void ASNAILLGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

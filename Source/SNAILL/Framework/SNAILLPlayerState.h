@@ -24,7 +24,9 @@ public:
 		FString PlayerName;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
 		int32 PlayerCurrentKills;
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
+		FString KillerName;
+	
 protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
