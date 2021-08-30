@@ -128,7 +128,7 @@ void ASNAILLPlayerController::Client_DisplayEndGameWidget_Implementation(bool bI
 	{
 		if (bIsWinningTeam)
 		{
-			GameEndWidget->AddToViewport();
+			GameEndWidget->AddToViewport(100);
 			bShowMouseCursor = true;
 			SetInputMode(FInputModeUIOnly());
 			GameEndWidget->bIsWinningTeam = true;

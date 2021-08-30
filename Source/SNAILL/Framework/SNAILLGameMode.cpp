@@ -66,7 +66,7 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 		if(APlayerCharacter* TargetPlayer = Cast<APlayerCharacter>(Target))
 		{
 			APlayerCharacter* ShooterPlayer = Cast<APlayerCharacter>(Shooter);
-			SnailGameState = GetGameState<ASNAILLGameState>();
+			//SnailGameState = GetGameState<ASNAILLGameState>();
 			if(bCanProjectileDamageAllies)
 			{
 
@@ -154,14 +154,15 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 
 void ASNAILLGameMode::Respawn(ASNAILLPlayerController* PlayerToRespawn)
 {
-	
-	PlayerToRespawn->GetPawn()->Destroy();
+	APlayerCharacter* ToDestroy = Cast<APlayerCharacter>(PlayerToRespawn->GetPawn());
+	ToDestroy->CurrentWeapon->Destroy();
+	ToDestroy->Destroy();
 	//if(PlayerToRespawn->GetPawn())
 	//{
 		//PlayerToRespawn->UnPossess();
 	//}
 
-	SnailGameState = GetGameState<ASNAILLGameState>();
+	//SnailGameState = GetGameState<ASNAILLGameState>();
 	TArray<AActor*> TeamStart;
 	TSubclassOf<APlayerCharacter> TeamCharacter;
 	switch (SnailGameState->GetPlayerTeam(PlayerToRespawn))
@@ -197,34 +198,34 @@ void ASNAILLGameMode::EndGame(EGameTeams WinningTeam)
 
 	if(WinningTeam==EGameTeams::EGT_TeamA)
 	{
-		for(ASNAILLPlayerController* Controller : GetGameState<ASNAILLGameState>()->TeamAPlayers)
+		for(ASNAILLPlayerController* Controller : SnailGameState->TeamAPlayers)
 		{
-			Controller->ClientIgnoreLookInput(true);
-			Controller->ClientIgnoreMoveInput(true);
-			Controller->TogglePlayerDeathScreen(false);
+			// Controller->ClientIgnoreLookInput(true);
+			// Controller->ClientIgnoreMoveInput(true);
+			//Controller->TogglePlayerDeathScreen(false);
 			Controller->ShowGameEndScreen(true);
 		}
-		for(ASNAILLPlayerController* Controller : GetGameState<ASNAILLGameState>()->TeamBPlayers)
+		for(ASNAILLPlayerController* Controller : SnailGameState->TeamBPlayers)
 		{
-			Controller->ClientIgnoreLookInput(true);
-			Controller->ClientIgnoreMoveInput(true);
-			Controller->TogglePlayerDeathScreen(false);
+			// Controller->ClientIgnoreLookInput(true);
+			// Controller->ClientIgnoreMoveInput(true);
+			//Controller->TogglePlayerDeathScreen(false);
 			Controller->ShowGameEndScreen(false);
 		}
 	}else if(WinningTeam==EGameTeams::EGT_TeamB)
 	{
-		for(ASNAILLPlayerController* Controller : GetGameState<ASNAILLGameState>()->TeamAPlayers)
+		for(ASNAILLPlayerController* Controller : SnailGameState->TeamAPlayers)
 		{
-			Controller->ClientIgnoreLookInput(true);
-			Controller->ClientIgnoreMoveInput(true);
-			Controller->TogglePlayerDeathScreen(false);
+			// Controller->ClientIgnoreLookInput(true);
+			// Controller->ClientIgnoreMoveInput(true);
+			//Controller->TogglePlayerDeathScreen(false);
 			Controller->ShowGameEndScreen(false);
 		}
-		for(ASNAILLPlayerController* Controller : GetGameState<ASNAILLGameState>()->TeamBPlayers)
+		for(ASNAILLPlayerController* Controller : SnailGameState->TeamBPlayers)
 		{
-			Controller->ClientIgnoreLookInput(true);
-			Controller->ClientIgnoreMoveInput(true);
-			Controller->TogglePlayerDeathScreen(false);
+			// Controller->ClientIgnoreLookInput(true);
+			// Controller->ClientIgnoreMoveInput(true);
+			//Controller->TogglePlayerDeathScreen(false);
 			Controller->ShowGameEndScreen(true);
 		}
 	}

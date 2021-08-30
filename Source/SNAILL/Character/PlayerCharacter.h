@@ -97,6 +97,18 @@ protected:
 		void EndInteract();
 	UFUNCTION()
 		void BeginShooting();
+	UFUNCTION()
+		void BeginShootingSpecial();
+	UFUNCTION()
+		void BeginSprinting();
+	UFUNCTION()
+		void EndSprinting();
+	UFUNCTION(Server, Reliable)
+		void Server_BeginSprinting();
+	UFUNCTION(Server, Reliable)
+		void Server_EndSprinting();
+	
+	
 	UFUNCTION(BlueprintCallable)
 		ASNAILLPlayerController* TryGetPlayerController();
 
@@ -120,6 +132,8 @@ public:
 		void Server_TrySpray();
 	UFUNCTION(Server, Reliable)
 		void Server_BeginShooting();
+	UFUNCTION(Server, Reliable)
+		void Server_BeginShootingSpecial();
 
 	UFUNCTION()
 		void SelectDefWeaponTMP();

@@ -25,8 +25,8 @@ APlayerCharacter::APlayerCharacter()
 	GetMesh()->SetOwnerNoSee(false);
 
 	PlayerCurrentJumpBoostCount = 0;
-	PlayerMaxJumpBoostCount = 1;
-	PlayerAirBoostPower = 650.f;
+	PlayerMaxJumpBoostCount = 2;
+	PlayerAirBoostPower = 900.f;
 	AirControlWhileBoosted = 0.4f;
 
 	playerMaxHealth = 100.f;
@@ -243,6 +243,49 @@ void APlayerCharacter::BeginShooting()
 
 }
 
+void APlayerCharacter::BeginShootingSpecial()
+{
+	if(!HasAuthority())
+	{
+		Server_BeginShootingSpecial();
+	}else
+	{
+			
+		if(CurrentWeapon)
+		{
+			CurrentWeapon->ShootSpecial();
+		}
+	}
+}
+
+void APlayerCharacter::BeginSprinting()
+{
+	if(!HasAuthority())
+	{
+		Server_BeginSprinting();
+	}
+	GetCharacterMovement()->MaxWalkSpeed = 1200;
+}
+
+void APlayerCharacter::EndSprinting()
+{
+	if(!HasAuthority())
+	{
+		Server_EndSprinting();
+	}
+	GetCharacterMovement()->MaxWalkSpeed = 600;
+}
+
+void APlayerCharacter::Server_BeginSprinting_Implementation()
+{
+	BeginSprinting();
+}
+
+void APlayerCharacter::Server_EndSprinting_Implementation()
+{
+	EndSprinting();
+}
+
 ASNAILLPlayerController* APlayerCharacter::TryGetPlayerController()
 {
 	return GetController<ASNAILLPlayerController>();
@@ -278,6 +321,11 @@ void APlayerCharacter::Server_BeginShooting_Implementation()
 	BeginShooting();
 }
 
+
+void APlayerCharacter::Server_BeginShootingSpecial_Implementation()
+{
+	BeginShootingSpecial();
+}
 
 void APlayerCharacter::SelectDefWeaponTMP()
 {
@@ -351,6 +399,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Spray", IE_Released, this, &APlayerCharacter::TrySpray);
 	PlayerInputComponent->BindAction("TMP", IE_Released, this, &APlayerCharacter::Server_TMP);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::BeginShooting);
+	PlayerInputComponent->BindAction("Fire_Special", IE_Pressed, this, &APlayerCharacter::BeginShootingSpecial);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::BeginSprinting);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::EndSprinting);
 
 }
 

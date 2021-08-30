@@ -23,6 +23,8 @@ public:
 		FText WeaponName;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties")
 		class TSubclassOf<class AProjectile> WeaponProjectile;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weaopon Properties")
+		class TSubclassOf<class AProjectile> WeaponProjectileSpecial;
 				
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UStaticMeshComponent* WeaponMeshComponent;
@@ -46,5 +48,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		virtual void Shoot();
+	UFUNCTION(BlueprintCallable)
+		virtual void ShootSpecial();
 	
 };
