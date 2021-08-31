@@ -35,29 +35,26 @@ void ASuperchargedProjectile::OnImpact(UPrimitiveComponent* OverlappedComponent,
     		{
     			if(WeaponBase && OtherActor != GetInstigator())
     			{
-    					Client_RunParticles();
-    					//OtherActor->Destroy();
-    					//Destroy();
-    					UE_LOG(LogTemp, Warning, TEXT("Calling Damage Handler"));
-    					Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), OtherActor, projectileDamage, bCanDamageAllies);
-    					this->Destroy();
-    					DoAoEDamage();
+    				Client_RunParticles();
+    				//OtherActor->Destroy();
+    				//Destroy();
+    				UE_LOG(LogTemp, Warning, TEXT("Calling Damage Handler"));
+    				Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), OtherActor, projectileDamage, bCanDamageAllies);
+    				DoAoEDamage();
+    				this->Destroy();
     			}
-    		}else
-    		{
-    			RunParticles();
     		}
 }
 
 void ASuperchargedProjectile::OnBlock(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-		RunParticles();
+		RunParticles(AoESphere->GetScaledSphereRadius());
 		if(HasAuthority())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Block Destroy"));
 			DoAoEDamage();
-			//this->Destroy();
+			this->Destroy();
 		}	
 	
 }
@@ -69,11 +66,20 @@ void ASuperchargedProjectile::DoAoEDamage()
 	TArray<AActor*> ToIgnore;
 	ObjTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), AoESphere->GetComponentLocation(), AoESphere->GetScaledSphereRadius(), ObjTypes, nullptr, ToIgnore, Actors);
+	DrawDebugSphere(GetWorld(), AoESphere->GetComponentLocation(), AoESphere->GetScaledSphereRadius(), 4, FColor::Purple);
 	UE_LOG(LogTemp, Warning, TEXT("Array Count: %d"), Actors.Num());
+	for(AActor* AoEActor : Actors)
+	{
+		if(APlayerCharacter* AoEPlayer = Cast<APlayerCharacter>(AoEActor))
+		{
+			AoEPlayer->ChangePlayerHealth(AoEDamageValue * -1);
+		}
+		
+	}
 	
 }
 
 void ASuperchargedProjectile::Client_RunParticles_Implementation()
 {
-	RunParticles();
+	RunParticles(AoESphere->GetScaledSphereRadius());
 }

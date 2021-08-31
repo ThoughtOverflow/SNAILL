@@ -66,12 +66,20 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		AWeaponBase* CurrentWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing=OnRep_IsSuperchargeReady)
+		bool bIsSuperchargeReady;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
+		int32 SuperchargeDelay;
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+		void OnRep_IsSuperchargeReady();
 
 	UFUNCTION()
 		void TrySpray();
@@ -116,6 +124,12 @@ protected:
 	float playerHealth;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, ReplicatedUsing = OnRep_PlayerMaxHealth)
 	float playerMaxHealth;
+	UPROPERTY()
+		FTimerHandle SuperchargeTimer;
+	UFUNCTION()
+		void OnSuperchargeFinished();
+	UFUNCTION(Server, Reliable)
+		void StartSuperchargeTimer();
 	
 
 public:	

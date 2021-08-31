@@ -31,9 +31,11 @@ APlayerCharacter::APlayerCharacter()
 
 	playerMaxHealth = 100.f;
 	playerHealth = 100.f;
+	SuperchargeDelay = 120;
 
 	bSprayAvailable = false;
 	bIsPlayerDead = false;
+	bIsSuperchargeReady = false;
 
 	//----------------COMPONENT INITIALIZATION------------
 
@@ -57,6 +59,9 @@ void APlayerCharacter::BeginPlay()
 		PC = PlayerController;
 	}
 
+	StartSuperchargeTimer();
+	
+	
 	//UE_LOG(LogTemp, Warning, TEXT("WUT? - %s - %s"), IsLocallyControlled() ? TEXT("LOCAL") : TEXT("NOTLOCAL"), *GetName());
 	
 }
@@ -68,9 +73,35 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, playerHealth);
 	DOREPLIFETIME(APlayerCharacter, playerMaxHealth);
 	DOREPLIFETIME(APlayerCharacter, bIsPlayerDead);
+	DOREPLIFETIME(APlayerCharacter, bIsSuperchargeReady);
+	DOREPLIFETIME(APlayerCharacter, SuperchargeDelay);
 	
 }
 
+void APlayerCharacter::OnRep_IsSuperchargeReady()
+{
+	//TODO: UILOGIC FOR SUPERCHARGE;
+	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
+	{
+		if(PlayerController->PlayerBasicUIWidget) {
+		PlayerController->PlayerBasicUIWidget->bIsSuperchargeReady = bIsSuperchargeReady;
+		PlayerController->PlayerBasicUIWidget->RefreshWidget();
+		}
+	}
+	
+}
+
+
+void APlayerCharacter::OnSuperchargeFinished()
+{
+	bIsSuperchargeReady = true;
+	OnRep_IsSuperchargeReady();
+}
+
+void APlayerCharacter::StartSuperchargeTimer_Implementation()
+{
+	GetWorldTimerManager().SetTimer(SuperchargeTimer, this, &APlayerCharacter::OnSuperchargeFinished, SuperchargeDelay, false);
+}
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
@@ -251,9 +282,16 @@ void APlayerCharacter::BeginShootingSpecial()
 	}else
 	{
 			
-		if(CurrentWeapon)
+		if(CurrentWeapon && bIsSuperchargeReady)
 		{
 			CurrentWeapon->ShootSpecial();
+			bIsSuperchargeReady = false;
+			OnRep_IsSuperchargeReady();
+			GetWorldTimerManager().ClearTimer(SuperchargeTimer);
+			StartSuperchargeTimer();
+		}else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("NOTREADYUIDIOT"));
 		}
 	}
 }
