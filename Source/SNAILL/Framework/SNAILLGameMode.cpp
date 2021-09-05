@@ -71,14 +71,15 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 			{
 
 				TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
-				EGameTeams Team = SnailGameState->GetPlayerTeam(Cast<ASNAILLPlayerController>(ShooterPlayer->GetController()));
+				EGameTeams ShooterTeam = SnailGameState->GetPlayerTeam(Cast<ASNAILLPlayerController>(ShooterPlayer->GetController()));
 				APlayerCharacter* KilledPlayer = Cast<APlayerCharacter>(Target);
+				EGameTeams KilledTeam = SnailGameState->GetPlayerTeam(Cast<ASNAILLPlayerController>(KilledPlayer->GetController()));
 
 				//Double Check Kill Boolean:
-				if(KilledPlayer->bIsPlayerDead)
+				if(KilledPlayer->bIsPlayerDead && ShooterTeam!=KilledTeam)
 				{
 					//TODO: Kill Scoring Logic
-					switch (Team)
+					switch (ShooterTeam)
 					{
 						case EGameTeams::EGT_TeamA:
 						SnailGameState->TeamAKillScore++;
@@ -154,9 +155,15 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 
 void ASNAILLGameMode::Respawn(ASNAILLPlayerController* PlayerToRespawn)
 {
-	APlayerCharacter* ToDestroy = Cast<APlayerCharacter>(PlayerToRespawn->GetPawn());
-	ToDestroy->CurrentWeapon->Destroy();
-	ToDestroy->Destroy();
+	if(APlayerCharacter* ToDestroy = Cast<APlayerCharacter>(PlayerToRespawn->GetPawn()))
+	{
+		if(ToDestroy->CurrentWeapon)
+		{
+			ToDestroy->CurrentWeapon->Destroy();
+		}
+		ToDestroy->Destroy();
+	}
+	
 	//if(PlayerToRespawn->GetPawn())
 	//{
 		//PlayerToRespawn->UnPossess();

@@ -50,5 +50,7 @@ public:
 		virtual void Shoot();
 	UFUNCTION(BlueprintCallable)
 		virtual void ShootSpecial();
+	UFUNCTION(BlueprintImplementableEvent)
+		void SpawnMuzzleParticle();
 	
 };

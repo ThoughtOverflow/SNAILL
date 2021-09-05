@@ -28,6 +28,7 @@ APlayerCharacter::APlayerCharacter()
 	PlayerMaxJumpBoostCount = 2;
 	PlayerAirBoostPower = 900.f;
 	AirControlWhileBoosted = 0.4f;
+	SpeedFactorMultiplier = 1.f;
 
 	playerMaxHealth = 100.f;
 	playerHealth = 100.f;
@@ -54,6 +55,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	PlayerCurrentJumpBoostCount = 0;
+	GetCharacterMovement()->MaxWalkSpeed *= SpeedFactorMultiplier;
 	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
 	{
 		PC = PlayerController;
@@ -302,7 +304,7 @@ void APlayerCharacter::BeginSprinting()
 	{
 		Server_BeginSprinting();
 	}
-	GetCharacterMovement()->MaxWalkSpeed = 1200;
+	GetCharacterMovement()->MaxWalkSpeed = 1200 * SpeedFactorMultiplier;
 }
 
 void APlayerCharacter::EndSprinting()
@@ -311,7 +313,7 @@ void APlayerCharacter::EndSprinting()
 	{
 		Server_EndSprinting();
 	}
-	GetCharacterMovement()->MaxWalkSpeed = 600;
+	GetCharacterMovement()->MaxWalkSpeed = 600 * SpeedFactorMultiplier;
 }
 
 void APlayerCharacter::Server_BeginSprinting_Implementation()
@@ -378,6 +380,7 @@ void APlayerCharacter::OnRep_PlayerHealth()
 		{
 			PlayerController->PlayerBasicUIWidget->PlayerHealth = playerHealth;
 			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
+			// PlayerController->PlayerBasicUIWidget->bIsSuperchargeReady = false;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 			UE_LOG(LogTemp, Error, TEXT("HP: %f"), playerHealth);
 		}
@@ -502,6 +505,7 @@ void APlayerCharacter::DisplayBasicUI_Implementation()
 		{
 			PlayerController->PlayerBasicUIWidget->PlayerHealth = playerHealth;
 			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
+			PlayerController->PlayerBasicUIWidget->bIsSuperchargeReady = false;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 		}
 	}

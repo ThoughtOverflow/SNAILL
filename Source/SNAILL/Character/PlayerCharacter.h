@@ -59,6 +59,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_IsPlayerDead)
 		bool bIsPlayerDead;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		float SpeedFactorMultiplier;
+
 	//Weapon Stuff:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
@@ -124,11 +127,11 @@ protected:
 	float playerHealth;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, ReplicatedUsing = OnRep_PlayerMaxHealth)
 	float playerMaxHealth;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 		FTimerHandle SuperchargeTimer;
 	UFUNCTION()
 		void OnSuperchargeFinished();
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 		void StartSuperchargeTimer();
 	
 

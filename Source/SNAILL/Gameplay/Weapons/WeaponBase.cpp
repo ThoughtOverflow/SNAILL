@@ -55,7 +55,7 @@ void AWeaponBase::Tick(float DeltaTime)
 
 void AWeaponBase::Shoot()
 {
-
+	SpawnMuzzleParticle();
 	if(GetOwner()->HasAuthority())
 	{
 		if(WeaponProjectile)
@@ -66,17 +66,17 @@ void AWeaponBase::Shoot()
 			FHitResult HitResult;
 			//FVector End = Forward + (Rot.Vector() * 1000.f);
 			Forward = Cast<APlayerCharacter>(GetOwner())->PlayerCamera->GetComponentLocation();
-			FVector End = Forward + (Cast<APlayerCharacter>(GetOwner())->GetController()->GetControlRotation().Vector() * 1000.f);
+			FVector End = Forward + (Cast<APlayerCharacter>(GetOwner())->GetController()->GetControlRotation().Vector() * 30000.f);
 				GetWorld()->LineTraceSingleByChannel(HitResult, Forward, End, ECC_Visibility);
-				//DrawDebugLine(GetWorld(), Forward, End, FColor(0, 255, 0), false, 10, 0, 1.5);
+				DrawDebugLine(GetWorld(), Forward, End, FColor(0, 255, 0), false, 10, 0, 1.5);
 				FVector HitPoint = HitResult.GetActor() ? HitResult.ImpactPoint : End;
 				FRotator RotationTowardsHit = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), HitPoint);
-				//DrawDebugLine(GetWorld(), GetActorLocation(), HitPoint, FColor::Purple, false, 5, 0, 1);
+				DrawDebugLine(GetWorld(), GetActorLocation(), HitPoint, FColor::Purple, false, 5, 0, 1);
 				FActorSpawnParameters Parameters;
 				Parameters.Instigator = Cast<APawn>(GetOwner());
 				AProjectile* P = GetWorld()->SpawnActor<AProjectile>(WeaponProjectile, GetActorLocation(), RotationTowardsHit, Parameters);
 				P->WeaponBase = this;
-				//UE_LOG(LogTemp, Warning, TEXT("SHOOTING SHOOTING ROT: %s"), *HitPoint.ToString());	
+				//UE_LOG(LogTemp, Warning, TEXT("SHOOTING SHOOTING ROT: %s"), *HitPoint.ToString());
 		}
 	}else
 	{
@@ -87,6 +87,7 @@ void AWeaponBase::Shoot()
 
 void AWeaponBase::ShootSpecial()
 {
+	SpawnMuzzleParticle();
 	if(GetOwner()->HasAuthority())
 	{
 		if(WeaponProjectileSpecial)
@@ -97,7 +98,7 @@ void AWeaponBase::ShootSpecial()
 			FHitResult HitResult;
 			//FVector End = Forward + (Rot.Vector() * 1000.f);
 			Forward = Cast<APlayerCharacter>(GetOwner())->PlayerCamera->GetComponentLocation();
-			FVector End = Forward + (Cast<APlayerCharacter>(GetOwner())->GetController()->GetControlRotation().Vector() * 1000.f);
+			FVector End = Forward + (Cast<APlayerCharacter>(GetOwner())->GetController()->GetControlRotation().Vector() * 30000.f);
 			GetWorld()->LineTraceSingleByChannel(HitResult, Forward, End, ECC_Visibility);
 			//DrawDebugLine(GetWorld(), Forward, End, FColor(0, 255, 0), false, 10, 0, 1.5);
 			FVector HitPoint = HitResult.GetActor() ? HitResult.ImpactPoint : End;

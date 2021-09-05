@@ -3,6 +3,8 @@
 
 #include "InteractionComponent.h"
 
+#include "SNAILL/UMG/UserWidgets/InteractionWidgetBase.h"
+
 
 #define LOCTEXT_NAMESPACE "Interaction"
 
@@ -62,7 +64,7 @@ void UInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*UInteractionWidgetBase* BaseWidget = Cast<UInteractionWidgetBase>(GetUserWidgetObject());
+	UInteractionWidgetBase* BaseWidget = Cast<UInteractionWidgetBase>(GetUserWidgetObject());
 
 	if(BaseWidget)
 	{
@@ -71,7 +73,7 @@ void UInteractionComponent::BeginPlay()
 		BaseWidget->InteractionTime = InteractionTime;
 
 		BaseWidget->RefreshWidget();
-	}*/
+	}
 	
 }
 

@@ -43,7 +43,14 @@ void ASuperchargedProjectile::OnImpact(UPrimitiveComponent* OverlappedComponent,
     				DoAoEDamage();
     				this->Destroy();
     			}
+    		}else
+    		{
+    			if(OtherActor != GetInstigator())
+    			{
+    				RunParticles(AoESphere->GetScaledSphereRadius());
+    			}
     		}
+    		
 }
 
 void ASuperchargedProjectile::OnBlock(UPrimitiveComponent* HitComponent, AActor* OtherActor,
@@ -52,9 +59,9 @@ void ASuperchargedProjectile::OnBlock(UPrimitiveComponent* HitComponent, AActor*
 		RunParticles(AoESphere->GetScaledSphereRadius());
 		if(HasAuthority())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Block Destroy"));
-			DoAoEDamage();
-			this->Destroy();
+				UE_LOG(LogTemp, Warning, TEXT("Block Destroy"));
+				DoAoEDamage();
+				this->Destroy();
 		}	
 	
 }
@@ -72,7 +79,8 @@ void ASuperchargedProjectile::DoAoEDamage()
 	{
 		if(APlayerCharacter* AoEPlayer = Cast<APlayerCharacter>(AoEActor))
 		{
-			AoEPlayer->ChangePlayerHealth(AoEDamageValue * -1);
+			//AoEPlayer->ChangePlayerHealth(AoEDamageValue * -1);
+			Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), AoEPlayer, AoEDamageValue, true);
 		}
 		
 	}

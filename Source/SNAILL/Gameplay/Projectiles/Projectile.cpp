@@ -56,7 +56,7 @@ void AProjectile::OnImpact(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 					//Destroy();
 					UE_LOG(LogTemp, Warning, TEXT("Calling Damage Handler"));
 					Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), OtherActor, projectileDamage, bCanDamageAllies);
-					this->Destroy();	
+					this->Destroy();
 			}
 		}	 
 	
