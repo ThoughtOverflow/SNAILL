@@ -2,6 +2,8 @@
          
          
 #include "SNAILLPlayerController.h"
+
+#include "SNAILLPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "SNAILL/Framework/SNAILLGameMode.h"
 
@@ -21,7 +23,7 @@ ASNAILLPlayerController::ASNAILLPlayerController()
          	if (IsLocalController())
          	{
          		UE_LOG(LogTemp, Warning, TEXT("WHATISGOINGON?"));
-         		if (bIsVisible)
+         		if (bIsVisible && !PlayerBasicUIWidget->IsVisible())
          		{
          			PlayerBasicUIWidget->AddToViewport();
          		}
@@ -115,6 +117,16 @@ void ASNAILLPlayerController::InitPossess()
 			Possess(ToPossess);
 		}
 	}
+}
+
+void ASNAILLPlayerController::SetPlayerName_Implementation(const FString& PlayerName)
+{
+	if(HasAuthority())
+	{
+		GetPlayerState<ASNAILLPlayerState>()->PlayerName = PlayerName;
+		GetPlayerState<ASNAILLPlayerState>()->ForceNetUpdate();
+	}
+	
 }
 
 void ASNAILLPlayerController::Client_DisplayEndGameWidget_Implementation(bool bIsWinningTeam)

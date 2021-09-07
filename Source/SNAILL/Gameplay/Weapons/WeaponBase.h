@@ -41,6 +41,9 @@ protected:
 	UFUNCTION()
 		void OnRep_AmmoInOneMag();
 
+	UFUNCTION(NetMulticast, Unreliable)
+		void Multicast_SpawnMuzzleParticle();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

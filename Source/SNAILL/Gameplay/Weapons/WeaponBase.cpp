@@ -46,6 +46,11 @@ void AWeaponBase::OnRep_AmmoInOneMag()
 {
 }
 
+void AWeaponBase::Multicast_SpawnMuzzleParticle_Implementation()
+{
+	SpawnMuzzleParticle();
+}
+
 // Called every frame
 void AWeaponBase::Tick(float DeltaTime)
 {
@@ -55,9 +60,10 @@ void AWeaponBase::Tick(float DeltaTime)
 
 void AWeaponBase::Shoot()
 {
-	SpawnMuzzleParticle();
 	if(GetOwner()->HasAuthority())
 	{
+		//SpawnMuzzleParticle();
+		Multicast_SpawnMuzzleParticle();
 		if(WeaponProjectile)
 		{
 			FVector Forward;
@@ -87,9 +93,10 @@ void AWeaponBase::Shoot()
 
 void AWeaponBase::ShootSpecial()
 {
-	SpawnMuzzleParticle();
 	if(GetOwner()->HasAuthority())
 	{
+		//SpawnMuzzleParticle();
+		Multicast_SpawnMuzzleParticle();
 		if(WeaponProjectileSpecial)
 		{
 			FVector Forward;

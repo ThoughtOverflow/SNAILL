@@ -69,6 +69,8 @@ protected:
 		void SelectTeam(EGameTeams Team, ASNAILLPlayerController* PlayerController);
 	UFUNCTION(BlueprintCallable, Server, Reliable)
 		void RespawnPlayer();
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+		void SetPlayerName(const FString& PlayerName);
 
 
 	

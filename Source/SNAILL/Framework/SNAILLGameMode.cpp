@@ -70,11 +70,15 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 			if(bCanProjectileDamageAllies)
 			{
 
-				TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
 				EGameTeams ShooterTeam = SnailGameState->GetPlayerTeam(Cast<ASNAILLPlayerController>(ShooterPlayer->GetController()));
 				APlayerCharacter* KilledPlayer = Cast<APlayerCharacter>(Target);
 				EGameTeams KilledTeam = SnailGameState->GetPlayerTeam(Cast<ASNAILLPlayerController>(KilledPlayer->GetController()));
+				KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->KillerName = ShooterPlayer->GetPlayerState<ASNAILLPlayerState>()->PlayerName;
+				KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->ForceNetUpdate();
+				UE_LOG(LogTemp, Warning, TEXT("SET PLAYER STATE VAR TO: %s"), *KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->KillerName);
 
+				TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
+				
 				//Double Check Kill Boolean:
 				if(KilledPlayer->bIsPlayerDead && ShooterTeam!=KilledTeam)
 				{
@@ -111,11 +115,14 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 			{
 				if(SnailGameState->GetPlayerTeam(Cast<ASNAILLPlayerController>(ShooterPlayer->GetController()))!=SnailGameState->GetPlayerTeam(Cast<ASNAILLPlayerController>(TargetPlayer->GetController())))
 				{
-					TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
 					EGameTeams Team = SnailGameState->GetPlayerTeam(Cast<ASNAILLPlayerController>(ShooterPlayer->GetController()));
 					APlayerCharacter* KilledPlayer = Cast<APlayerCharacter>(Target);
-					KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->KillerName = ShooterPlayer->GetPlayerState<ASNAILLPlayerState>()->GetPlayerName();
-					UE_LOG(LogTemp, Warning, TEXT("SET PLAYER STATE VAR"));
+					KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->KillerName = ShooterPlayer->GetPlayerState<ASNAILLPlayerState>()->PlayerName;
+					KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->ForceNetUpdate();
+					UE_LOG(LogTemp, Warning, TEXT("SET PLAYER STATE VAR TO: %s"), *KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->KillerName);
+
+					TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
+					
 					//Double Check Kill Boolean:
 					if(KilledPlayer->bIsPlayerDead)
 					{

@@ -23,7 +23,9 @@ APlayerCharacter::APlayerCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	GetMesh()->SetOwnerNoSee(false);
-
+	
+	DefaultWalkSpeed = 600;
+	RunningSpeedMultiplier = 2.0f;
 	PlayerCurrentJumpBoostCount = 0;
 	PlayerMaxJumpBoostCount = 2;
 	PlayerAirBoostPower = 900.f;
@@ -78,6 +80,14 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, bIsSuperchargeReady);
 	DOREPLIFETIME(APlayerCharacter, SuperchargeDelay);
 	
+}
+
+void APlayerCharacter::FellOutOfWorld(const UDamageType& dmgType)
+{
+	if(HasAuthority())
+	{
+		Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->Respawn(Cast<ASNAILLPlayerController>(GetController()));
+	}
 }
 
 void APlayerCharacter::OnRep_IsSuperchargeReady()
@@ -304,7 +314,7 @@ void APlayerCharacter::BeginSprinting()
 	{
 		Server_BeginSprinting();
 	}
-	GetCharacterMovement()->MaxWalkSpeed = 1200 * SpeedFactorMultiplier;
+	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed * RunningSpeedMultiplier * SpeedFactorMultiplier;
 }
 
 void APlayerCharacter::EndSprinting()
@@ -313,7 +323,7 @@ void APlayerCharacter::EndSprinting()
 	{
 		Server_EndSprinting();
 	}
-	GetCharacterMovement()->MaxWalkSpeed = 600 * SpeedFactorMultiplier;
+	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed * SpeedFactorMultiplier;
 }
 
 void APlayerCharacter::Server_BeginSprinting_Implementation()
@@ -413,10 +423,10 @@ void APlayerCharacter::OnRep_IsPlayerDead()
 			PlayerController->TogglePlayerDeathScreen(true);
 			if(PlayerController->PlayerDeathWidget)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("KILLERNAME: %s"), *GetController()->GetPlayerState<ASNAILLPlayerState>()->KillerName);
 				PlayerController->PlayerDeathWidget->KillerName = GetPlayerState<ASNAILLPlayerState>()->KillerName;
 				PlayerController->PlayerDeathWidget->currentKills = Cast<ASNAILLPlayerState>( GetPlayerState())->PlayerCurrentKills;
 				PlayerController->PlayerDeathWidget->RefreshWidget();
+				UE_LOG(LogTemp, Warning, TEXT("UPDATED UI"));
 			}
 				
 		}

@@ -32,7 +32,7 @@ public:
 		AWeaponBase* WeaponBase;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile Properties")
 		bool bCanDamageAllies;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile Properties")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile Properties")
 		int32 projectileDamage;
 
 protected:

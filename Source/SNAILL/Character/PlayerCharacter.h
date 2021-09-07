@@ -61,6 +61,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		float SpeedFactorMultiplier;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		float DefaultWalkSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	float RunningSpeedMultiplier;
 
 	//Weapon Stuff:
 
@@ -80,6 +84,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual void FellOutOfWorld(const UDamageType& dmgType) override;
 
 	UFUNCTION()
 		void OnRep_IsSuperchargeReady();
