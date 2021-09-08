@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -25,7 +26,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile Properties")
 		UProjectileMovementComponent* ProjectileMovementComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile Properties")
-		USphereComponent* SphereCollision;
+		UBoxComponent* BoxCollision;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile Properties")
 		float ProjectileSpeed;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Projectile Properties")

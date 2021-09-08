@@ -44,6 +44,7 @@ APlayerCharacter::APlayerCharacter()
 
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	PlayerCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "head");
+	//PlayerCamera->SetupAttachment(GetCapsuleComponent());
 	PlayerCamera->SetRelativeRotation(FRotator(0.0f,90.f,-90.f));
 	PlayerCamera->bUsePawnControlRotation = true;
 	PlayerCamera->SetFieldOfView(90);
