@@ -91,6 +91,17 @@ void ASNAILLPlayerController::ShowGameEndScreen(bool bIsWinningTeam)
 	Client_DisplayEndGameWidget(bIsWinningTeam);
 }
 
+void ASNAILLPlayerController::DoRotationVertical(float val)
+{
+	AddYawInput(val);
+	Client_DoRotationVertical(val);
+}
+
+void ASNAILLPlayerController::Client_DoRotationVertical_Implementation(float val)
+{
+	AddYawInput(val);
+}
+
 void ASNAILLPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

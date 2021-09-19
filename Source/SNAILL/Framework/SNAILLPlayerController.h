@@ -56,6 +56,11 @@ class SNAILL_API ASNAILLPlayerController : public APlayerController
 	UFUNCTION(Client, Reliable)
 	void Client_DisplayEndGameWidget(bool bIsWinningTeam);
 
+	UFUNCTION()
+		void DoRotationVertical(float val);
+	UFUNCTION(Client, Reliable)
+		void Client_DoRotationVertical(float val);
+
 protected:
 
 	virtual void BeginPlay() override;

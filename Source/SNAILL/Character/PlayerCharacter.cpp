@@ -121,6 +121,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CheckInteractable();
+	
+	
 }
 
 void APlayerCharacter::MoveForward(float val)
@@ -378,6 +380,17 @@ void APlayerCharacter::Server_BeginShootingSpecial_Implementation()
 	BeginShootingSpecial();
 }
 
+void APlayerCharacter::Server_DoRotationVertical_Implementation(float val)
+{
+	if(HasAuthority())
+	{
+		ASNAILLPlayerController* CurrentPC = Cast<ASNAILLPlayerController>(GetController());
+		
+		CurrentPC->DoRotationVertical(val);
+		
+	}
+}
+
 void APlayerCharacter::SelectDefWeaponTMP()
 {
 	SelectWeapon(WeaponToAdd);
@@ -442,6 +455,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("MouseX", this, &ACharacter::AddControllerYawInput);
+	//PlayerInputComponent->BindAxis("MouseX", this, &APlayerCharacter::Server_DoRotationVertical);
 	PlayerInputComponent->BindAxis("MouseY", this, &ACharacter::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APlayerCharacter::BeginJump);

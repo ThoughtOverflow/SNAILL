@@ -158,6 +158,10 @@ public:
 	UFUNCTION(Server, Reliable)
 		void Server_BeginShootingSpecial();
 
+			
+	UFUNCTION(Server, Reliable)
+		void Server_DoRotationVertical(float val);
+
 	UFUNCTION()
 		void SelectDefWeaponTMP();
 
@@ -190,8 +194,6 @@ public:
 		void ChangePlayerHealth(float deltaHealth);
 	UFUNCTION(BlueprintGetter)
 		FORCEINLINE float GetPlayerHealth() {return  playerHealth;};
-		
-
 	
 
 };
