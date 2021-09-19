@@ -26,6 +26,8 @@ class SNAILL_API UPlayerDefaultHUD : public UUserWidget
 	float ShieldChargeLevel;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
 	float ShieldMaxLevel;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+		bool bIsShieldBarRed;
 	
 	
 	UFUNCTION(BlueprintCallable)

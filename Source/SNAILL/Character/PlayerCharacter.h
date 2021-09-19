@@ -85,6 +85,9 @@ public:
 		float ShieldMaxLevel;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		bool bIsUsingShield;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		bool bIsShieldBarRed;
 	
 protected:
 	// Called when the game starts or when spawned

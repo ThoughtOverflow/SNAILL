@@ -41,6 +41,7 @@ APlayerCharacter::APlayerCharacter()
 	bSprayAvailable = false;
 	bIsPlayerDead = false;
 	bIsSuperchargeReady = false;
+	bIsShieldBarRed = false;
 
 	//----------------COMPONENT INITIALIZATION------------
 
@@ -118,6 +119,7 @@ void APlayerCharacter::OnRep_ShieldBattery()
 	{
 		if(PlayerController->PlayerBasicUIWidget) {
 			PlayerController->PlayerBasicUIWidget->ShieldChargeLevel = ShieldBatteryLevel;
+			PlayerController->PlayerBasicUIWidget->bIsShieldBarRed = bIsShieldBarRed;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 		}
 	}
@@ -376,8 +378,12 @@ void APlayerCharacter::EnableShield()
 		Server_EnableShield();
 	}else
 	{
-		TogglePlayerShield(true);
-		bIsUsingShield = true;
+		if(!bIsUsingShield && ShieldBatteryLevel/ShieldMaxLevel >= 0.25)
+		{
+			TogglePlayerShield(!bIsUsingShield);
+			bIsUsingShield = !bIsUsingShield;
+		}
+		
 	}
 
 }
@@ -537,7 +543,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::BeginSprinting);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::EndSprinting);
 	PlayerInputComponent->BindAction("ActivateShield", IE_Pressed, this, &APlayerCharacter::EnableShield);
-	PlayerInputComponent->BindAction("ActivateShield", IE_Released, this, &APlayerCharacter::DisableShield);
+	//PlayerInputComponent->BindAction("ActivateShield", IE_Released, this, &APlayerCharacter::DisableShield);
 
 }
 
@@ -600,6 +606,7 @@ void APlayerCharacter::ShieldTimerHit()
 			if(ShieldBatteryLevel<=0)
 			{
 				TogglePlayerShield(false);
+				bIsUsingShield = false;
 			}else
 			{
 				ShieldBatteryLevel--;
@@ -611,6 +618,15 @@ void APlayerCharacter::ShieldTimerHit()
 		{
 			if(ShieldBatteryLevel<ShieldMaxLevel)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("%f"), ShieldBatteryLevel/ShieldMaxLevel);
+				if(ShieldBatteryLevel/ShieldMaxLevel >= 0.25)
+				{
+					bIsShieldBarRed = false;
+				}else
+				{
+					bIsShieldBarRed = true;
+					UE_LOG(LogTemp, Warning, TEXT("Setting RED"));
+				}
 				ShieldBatteryLevel++;
 				OnRep_ShieldBattery();
 			}
@@ -630,6 +646,7 @@ void APlayerCharacter::DisplayBasicUI_Implementation()
 			PlayerController->PlayerBasicUIWidget->bIsSuperchargeReady = false;
 			PlayerController->PlayerBasicUIWidget->ShieldChargeLevel = ShieldBatteryLevel;
 			PlayerController->PlayerBasicUIWidget->ShieldMaxLevel = ShieldMaxLevel;
+			PlayerController->PlayerBasicUIWidget->bIsShieldBarRed = bIsShieldBarRed;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 		}
 	}
