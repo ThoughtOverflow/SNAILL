@@ -78,6 +78,13 @@ public:
 		bool bIsSuperchargeReady;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
 		int32 SuperchargeDelay;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, ReplicatedUsing=OnRep_ShieldBattery)
+		float ShieldBatteryLevel;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, ReplicatedUsing=OnRep_ShieldMaxBattery)
+		float ShieldMaxLevel;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
+		bool bIsUsingShield;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -89,6 +96,10 @@ protected:
 
 	UFUNCTION()
 		void OnRep_IsSuperchargeReady();
+	UFUNCTION()
+		void OnRep_ShieldBattery();
+	UFUNCTION()
+		void OnRep_ShieldMaxBattery();
 
 	UFUNCTION()
 		void TrySpray();
@@ -124,6 +135,10 @@ protected:
 		void Server_BeginSprinting();
 	UFUNCTION(Server, Reliable)
 		void Server_EndSprinting();
+	UFUNCTION()
+		void EnableShield();
+	UFUNCTION()
+		void DisableShield();
 	
 	
 	UFUNCTION(BlueprintCallable)
@@ -135,6 +150,8 @@ protected:
 	float playerMaxHealth;
 	UPROPERTY(BlueprintReadWrite)
 		FTimerHandle SuperchargeTimer;
+	UPROPERTY(BlueprintReadWrite)
+		FTimerHandle ShieldTimer;
 	UFUNCTION()
 		void OnSuperchargeFinished();
 	UFUNCTION(Server, Reliable, BlueprintCallable)
@@ -157,7 +174,10 @@ public:
 		void Server_BeginShooting();
 	UFUNCTION(Server, Reliable)
 		void Server_BeginShootingSpecial();
-
+	UFUNCTION(Server, Reliable)
+		void Server_EnableShield();
+	UFUNCTION(Server, Reliable)
+		void Server_DisableShield();
 			
 	UFUNCTION(Server, Reliable)
 		void Server_DoRotationVertical(float val);
@@ -194,6 +214,14 @@ public:
 		void ChangePlayerHealth(float deltaHealth);
 	UFUNCTION(BlueprintGetter)
 		FORCEINLINE float GetPlayerHealth() {return  playerHealth;};
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void BlinkHitWidget();
+	UFUNCTION(BlueprintImplementableEvent)
+		void TogglePlayerShield(bool bEnable);
+
+	UFUNCTION()
+		void ShieldTimerHit();
 	
 
 };

@@ -28,16 +28,18 @@ void ASuperchargedProjectile::BeginPlay()
 void ASuperchargedProjectile::OnImpact(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//RunParticles();
+	
 
 	
 	if(HasAuthority())
     		{
     			if(WeaponBase && OtherActor != GetInstigator())
     			{
-    				Client_RunParticles();
-    				//OtherActor->Destroy();
-    				//Destroy();
+    				if(GetNetMode() != ENetMode::NM_DedicatedServer)
+    				{
+    					Client_RunParticles();
+    				}
+    				
     				UE_LOG(LogTemp, Warning, TEXT("Calling Damage Handler"));
     				Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), OtherActor, projectileDamage, bCanDamageAllies);
     				DoAoEDamage();
@@ -56,7 +58,11 @@ void ASuperchargedProjectile::OnImpact(UPrimitiveComponent* OverlappedComponent,
 void ASuperchargedProjectile::OnBlock(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-		RunParticles(AoESphere->GetScaledSphereRadius());
+		if(GetNetMode() != ENetMode::NM_DedicatedServer)
+		{
+			RunParticles(AoESphere->GetScaledSphereRadius());
+		}
+	
 		if(HasAuthority())
 		{
 				UE_LOG(LogTemp, Warning, TEXT("Block Destroy"));

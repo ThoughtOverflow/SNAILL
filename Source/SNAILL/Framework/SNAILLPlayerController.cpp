@@ -29,7 +29,10 @@ ASNAILLPlayerController::ASNAILLPlayerController()
          		}
          		else
          		{
-         			PlayerBasicUIWidget->RemoveFromParent();
+         			if(!bIsVisible)
+         			{
+         				PlayerBasicUIWidget->RemoveFromParent();
+         			}
          		}
          	}else
          	{

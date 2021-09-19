@@ -35,6 +35,8 @@ APlayerCharacter::APlayerCharacter()
 	playerMaxHealth = 100.f;
 	playerHealth = 100.f;
 	SuperchargeDelay = 120;
+	ShieldMaxLevel = 100.f; // Shield Max Time = ShleidMaxLevel / 20;
+	ShieldBatteryLevel = 50.f; // Shield Time = ShieldBatteryLevel / 20;
 
 	bSprayAvailable = false;
 	bIsPlayerDead = false;
@@ -65,7 +67,10 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	StartSuperchargeTimer();
-	
+	if(HasAuthority())
+	{
+		GetWorldTimerManager().SetTimer(ShieldTimer, this, &APlayerCharacter::ShieldTimerHit, 0.05, true);
+	}
 	
 	//UE_LOG(LogTemp, Warning, TEXT("WUT? - %s - %s"), IsLocallyControlled() ? TEXT("LOCAL") : TEXT("NOTLOCAL"), *GetName());
 	
@@ -80,6 +85,9 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, bIsPlayerDead);
 	DOREPLIFETIME(APlayerCharacter, bIsSuperchargeReady);
 	DOREPLIFETIME(APlayerCharacter, SuperchargeDelay);
+	DOREPLIFETIME(APlayerCharacter, bIsUsingShield);
+	DOREPLIFETIME(APlayerCharacter, ShieldBatteryLevel);
+	DOREPLIFETIME(APlayerCharacter, ShieldMaxLevel);
 	
 }
 
@@ -102,6 +110,28 @@ void APlayerCharacter::OnRep_IsSuperchargeReady()
 		}
 	}
 	
+}
+
+void APlayerCharacter::OnRep_ShieldBattery()
+{
+	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
+	{
+		if(PlayerController->PlayerBasicUIWidget) {
+			PlayerController->PlayerBasicUIWidget->ShieldChargeLevel = ShieldBatteryLevel;
+			PlayerController->PlayerBasicUIWidget->RefreshWidget();
+		}
+	}
+}
+
+void APlayerCharacter::OnRep_ShieldMaxBattery()
+{
+	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
+	{
+		if(PlayerController->PlayerBasicUIWidget) {
+			PlayerController->PlayerBasicUIWidget->ShieldMaxLevel = ShieldMaxLevel;
+			PlayerController->PlayerBasicUIWidget->RefreshWidget();
+		}
+	}
 }
 
 
@@ -339,6 +369,32 @@ void APlayerCharacter::Server_EndSprinting_Implementation()
 	EndSprinting();
 }
 
+void APlayerCharacter::EnableShield()
+{
+	if(!HasAuthority())
+	{
+		Server_EnableShield();
+	}else
+	{
+		TogglePlayerShield(true);
+		bIsUsingShield = true;
+	}
+
+}
+
+void APlayerCharacter::DisableShield()
+{
+	if(!HasAuthority())
+	{
+		Server_DisableShield();
+	}else
+	{
+		TogglePlayerShield(false);
+		bIsUsingShield = false;
+	}
+	
+}
+
 ASNAILLPlayerController* APlayerCharacter::TryGetPlayerController()
 {
 	return GetController<ASNAILLPlayerController>();
@@ -391,6 +447,16 @@ void APlayerCharacter::Server_DoRotationVertical_Implementation(float val)
 	}
 }
 
+void APlayerCharacter::Server_EnableShield_Implementation()
+{
+	EnableShield();
+}
+
+void APlayerCharacter::Server_DisableShield_Implementation()
+{
+	DisableShield();
+}
+
 void APlayerCharacter::SelectDefWeaponTMP()
 {
 	SelectWeapon(WeaponToAdd);
@@ -406,6 +472,7 @@ void APlayerCharacter::OnRep_PlayerHealth()
 			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
 			// PlayerController->PlayerBasicUIWidget->bIsSuperchargeReady = false;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
+			BlinkHitWidget();
 			UE_LOG(LogTemp, Error, TEXT("HP: %f"), playerHealth);
 		}
 	}
@@ -420,6 +487,7 @@ void APlayerCharacter::OnRep_PlayerMaxHealth()
 			PlayerController->PlayerBasicUIWidget->PlayerHealth = playerHealth;
 			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
+			BlinkHitWidget();
 			UE_LOG(LogTemp, Error, TEXT("HP: %f"), playerHealth);
 		}
 	}
@@ -468,6 +536,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Fire_Special", IE_Pressed, this, &APlayerCharacter::BeginShootingSpecial);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::BeginSprinting);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::EndSprinting);
+	PlayerInputComponent->BindAction("ActivateShield", IE_Pressed, this, &APlayerCharacter::EnableShield);
+	PlayerInputComponent->BindAction("ActivateShield", IE_Released, this, &APlayerCharacter::DisableShield);
 
 }
 
@@ -521,6 +591,33 @@ void APlayerCharacter::ChangePlayerHealth(float deltaHealth)
 	}
 }
 
+void APlayerCharacter::ShieldTimerHit()
+{
+	if(HasAuthority())
+	{
+		if (bIsUsingShield)
+		{
+			if(ShieldBatteryLevel<=0)
+			{
+				TogglePlayerShield(false);
+			}else
+			{
+				ShieldBatteryLevel--;
+				OnRep_ShieldBattery();
+			}
+			
+		
+		}else
+		{
+			if(ShieldBatteryLevel<ShieldMaxLevel)
+			{
+				ShieldBatteryLevel++;
+				OnRep_ShieldBattery();
+			}
+		}	
+	}
+}
+
 void APlayerCharacter::DisplayBasicUI_Implementation()
 {
 	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
@@ -531,6 +628,8 @@ void APlayerCharacter::DisplayBasicUI_Implementation()
 			PlayerController->PlayerBasicUIWidget->PlayerHealth = playerHealth;
 			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
 			PlayerController->PlayerBasicUIWidget->bIsSuperchargeReady = false;
+			PlayerController->PlayerBasicUIWidget->ShieldChargeLevel = ShieldBatteryLevel;
+			PlayerController->PlayerBasicUIWidget->ShieldMaxLevel = ShieldMaxLevel;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 		}
 	}

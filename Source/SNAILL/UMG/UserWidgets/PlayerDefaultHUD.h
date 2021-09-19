@@ -22,11 +22,17 @@ class SNAILL_API UPlayerDefaultHUD : public UUserWidget
 	float PlayerMaxHealth;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
 	bool bIsSuperchargeReady;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+	float ShieldChargeLevel;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+	float ShieldMaxLevel;
 	
 	
 	UFUNCTION(BlueprintCallable)
 		void RefreshWidget();
 	UFUNCTION(BlueprintImplementableEvent)
 		void OnWidgetRefreshRequestCreated();
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+		void FlashDamageIndicator(float maskValue);
 	
 };
