@@ -86,7 +86,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		bool bIsUsingShield;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		bool bIsShieldBarRed;
 	
 protected:

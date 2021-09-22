@@ -89,6 +89,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, bIsUsingShield);
 	DOREPLIFETIME(APlayerCharacter, ShieldBatteryLevel);
 	DOREPLIFETIME(APlayerCharacter, ShieldMaxLevel);
+	DOREPLIFETIME(APlayerCharacter, bIsShieldBarRed);
 	
 }
 
@@ -329,7 +330,7 @@ void APlayerCharacter::BeginShootingSpecial()
 	}else
 	{
 			
-		if(CurrentWeapon && bIsSuperchargeReady)
+		if(CurrentWeapon && bIsSuperchargeReady && !bIsUsingShield)
 		{
 			CurrentWeapon->ShootSpecial();
 			bIsSuperchargeReady = false;
@@ -378,7 +379,7 @@ void APlayerCharacter::EnableShield()
 		Server_EnableShield();
 	}else
 	{
-		if(!bIsUsingShield && ShieldBatteryLevel/ShieldMaxLevel >= 0.25)
+		if(!bIsUsingShield && ShieldBatteryLevel/ShieldMaxLevel >= 0.25f)
 		{
 			TogglePlayerShield(!bIsUsingShield);
 			bIsUsingShield = !bIsUsingShield;
@@ -618,14 +619,12 @@ void APlayerCharacter::ShieldTimerHit()
 		{
 			if(ShieldBatteryLevel<ShieldMaxLevel)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("%f"), ShieldBatteryLevel/ShieldMaxLevel);
-				if(ShieldBatteryLevel/ShieldMaxLevel >= 0.25)
+				if(ShieldBatteryLevel/ShieldMaxLevel >= 0.25f)
 				{
 					bIsShieldBarRed = false;
 				}else
 				{
 					bIsShieldBarRed = true;
-					UE_LOG(LogTemp, Warning, TEXT("Setting RED"));
 				}
 				ShieldBatteryLevel++;
 				OnRep_ShieldBattery();

@@ -29,7 +29,7 @@ void ASuperchargedProjectile::OnImpact(UPrimitiveComponent* OverlappedComponent,
                                        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	
-
+	UE_LOG(LogTemp, Warning, TEXT("Impact!!!"));
 	
 	if(HasAuthority())
     		{
@@ -61,6 +61,9 @@ void ASuperchargedProjectile::OnBlock(UPrimitiveComponent* HitComponent, AActor*
 		if(GetNetMode() != ENetMode::NM_DedicatedServer)
 		{
 			RunParticles(AoESphere->GetScaledSphereRadius());
+		}else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DAFAQ IS GOIN ON?"));
 		}
 	
 		if(HasAuthority())
@@ -86,7 +89,10 @@ void ASuperchargedProjectile::DoAoEDamage()
 		if(APlayerCharacter* AoEPlayer = Cast<APlayerCharacter>(AoEActor))
 		{
 			//AoEPlayer->ChangePlayerHealth(AoEDamageValue * -1);
-			Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), AoEPlayer, AoEDamageValue, true);
+			if(!AoEPlayer->bIsUsingShield)
+			{
+				Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), AoEPlayer, AoEDamageValue, true);
+			}
 		}
 		
 	}
