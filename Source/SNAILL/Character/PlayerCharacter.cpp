@@ -40,7 +40,8 @@ APlayerCharacter::APlayerCharacter()
 
 	bSprayAvailable = false;
 	bIsPlayerDead = false;
-	bIsSuperchargeReady = false;
+	SuperchargeState = ESuperchargeState::ESS_Discharged;
+	PreviousSuperchargeState = ESuperchargeState::ESS_Disabled;
 	bIsShieldBarRed = false;
 
 	//----------------COMPONENT INITIALIZATION------------
@@ -84,12 +85,14 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, playerHealth);
 	DOREPLIFETIME(APlayerCharacter, playerMaxHealth);
 	DOREPLIFETIME(APlayerCharacter, bIsPlayerDead);
-	DOREPLIFETIME(APlayerCharacter, bIsSuperchargeReady);
+	DOREPLIFETIME(APlayerCharacter, SuperchargeState);
+	DOREPLIFETIME(APlayerCharacter, PreviousSuperchargeState);
 	DOREPLIFETIME(APlayerCharacter, SuperchargeDelay);
 	DOREPLIFETIME(APlayerCharacter, bIsUsingShield);
 	DOREPLIFETIME(APlayerCharacter, ShieldBatteryLevel);
 	DOREPLIFETIME(APlayerCharacter, ShieldMaxLevel);
 	DOREPLIFETIME(APlayerCharacter, bIsShieldBarRed);
+	DOREPLIFETIME(APlayerCharacter, SpeedFactorMultiplier);
 	
 }
 
@@ -101,17 +104,16 @@ void APlayerCharacter::FellOutOfWorld(const UDamageType& dmgType)
 	}
 }
 
-void APlayerCharacter::OnRep_IsSuperchargeReady()
+void APlayerCharacter::OnRep_SuperchargeState()
 {
 	//TODO: UILOGIC FOR SUPERCHARGE;
 	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
 	{
 		if(PlayerController->PlayerBasicUIWidget) {
-		PlayerController->PlayerBasicUIWidget->bIsSuperchargeReady = bIsSuperchargeReady;
-		PlayerController->PlayerBasicUIWidget->RefreshWidget();
+			PlayerController->PlayerBasicUIWidget->SuperchargeState = SuperchargeState;
+			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 		}
 	}
-	
 }
 
 void APlayerCharacter::OnRep_ShieldBattery()
@@ -140,8 +142,8 @@ void APlayerCharacter::OnRep_ShieldMaxBattery()
 
 void APlayerCharacter::OnSuperchargeFinished()
 {
-	bIsSuperchargeReady = true;
-	OnRep_IsSuperchargeReady();
+	SuperchargeState = ESuperchargeState::ESS_Charged;
+	OnRep_SuperchargeState();
 }
 
 void APlayerCharacter::StartSuperchargeTimer_Implementation()
@@ -330,11 +332,11 @@ void APlayerCharacter::BeginShootingSpecial()
 	}else
 	{
 			
-		if(CurrentWeapon && bIsSuperchargeReady && !bIsUsingShield)
+		if(CurrentWeapon && SuperchargeState == ESuperchargeState::ESS_Charged && !bIsUsingShield)
 		{
 			CurrentWeapon->ShootSpecial();
-			bIsSuperchargeReady = false;
-			OnRep_IsSuperchargeReady();
+			SuperchargeState = ESuperchargeState::ESS_Discharged;
+			OnRep_SuperchargeState();
 			GetWorldTimerManager().ClearTimer(SuperchargeTimer);
 			StartSuperchargeTimer();
 		}else
@@ -383,24 +385,21 @@ void APlayerCharacter::EnableShield()
 		{
 			TogglePlayerShield(!bIsUsingShield);
 			bIsUsingShield = !bIsUsingShield;
+			PreviousSuperchargeState = SuperchargeState;
+			SuperchargeState = ESuperchargeState::ESS_Disabled;
+			OnRep_SuperchargeState();
+			GetWorldTimerManager().PauseTimer(SuperchargeTimer);
 		}
 		
 	}
 
 }
 
-void APlayerCharacter::DisableShield()
+void APlayerCharacter::Client_ChangeWalkSpeed_Implementation(float newWalkSpeed)
 {
-	if(!HasAuthority())
-	{
-		Server_DisableShield();
-	}else
-	{
-		TogglePlayerShield(false);
-		bIsUsingShield = false;
-	}
-	
+	GetCharacterMovement()->MaxWalkSpeed = newWalkSpeed;
 }
+
 
 ASNAILLPlayerController* APlayerCharacter::TryGetPlayerController()
 {
@@ -459,11 +458,6 @@ void APlayerCharacter::Server_EnableShield_Implementation()
 	EnableShield();
 }
 
-void APlayerCharacter::Server_DisableShield_Implementation()
-{
-	DisableShield();
-}
-
 void APlayerCharacter::SelectDefWeaponTMP()
 {
 	SelectWeapon(WeaponToAdd);
@@ -477,7 +471,7 @@ void APlayerCharacter::OnRep_PlayerHealth()
 		{
 			PlayerController->PlayerBasicUIWidget->PlayerHealth = playerHealth;
 			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
-			// PlayerController->PlayerBasicUIWidget->bIsSuperchargeReady = false;
+			// PlayerController->PlayerBasicUIWidget->SuperchargeState = false;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 			BlinkHitWidget();
 			UE_LOG(LogTemp, Error, TEXT("HP: %f"), playerHealth);
@@ -544,7 +538,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::BeginSprinting);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::EndSprinting);
 	PlayerInputComponent->BindAction("ActivateShield", IE_Pressed, this, &APlayerCharacter::EnableShield);
-	//PlayerInputComponent->BindAction("ActivateShield", IE_Released, this, &APlayerCharacter::DisableShield);
 
 }
 
@@ -608,6 +601,13 @@ void APlayerCharacter::ShieldTimerHit()
 			{
 				TogglePlayerShield(false);
 				bIsUsingShield = false;
+				SuperchargeState = PreviousSuperchargeState;
+				if(PreviousSuperchargeState == ESuperchargeState::ESS_Discharged)
+				{
+					GetWorldTimerManager().UnPauseTimer(SuperchargeTimer);
+				}
+				OnRep_SuperchargeState();
+				
 			}else
 			{
 				ShieldBatteryLevel--;
@@ -642,7 +642,7 @@ void APlayerCharacter::DisplayBasicUI_Implementation()
 		{
 			PlayerController->PlayerBasicUIWidget->PlayerHealth = playerHealth;
 			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
-			PlayerController->PlayerBasicUIWidget->bIsSuperchargeReady = false;
+			PlayerController->PlayerBasicUIWidget->SuperchargeState = ESuperchargeState::ESS_Discharged;
 			PlayerController->PlayerBasicUIWidget->ShieldChargeLevel = ShieldBatteryLevel;
 			PlayerController->PlayerBasicUIWidget->ShieldMaxLevel = ShieldMaxLevel;
 			PlayerController->PlayerBasicUIWidget->bIsShieldBarRed = bIsShieldBarRed;

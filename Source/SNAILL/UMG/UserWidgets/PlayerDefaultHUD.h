@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "SNAILL/Enums/ESuperchargeState.h"
+
 #include "PlayerDefaultHUD.generated.h"
 
 /**
@@ -21,7 +23,7 @@ class SNAILL_API UPlayerDefaultHUD : public UUserWidget
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
 	float PlayerMaxHealth;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
-	bool bIsSuperchargeReady;
+	ESuperchargeState SuperchargeState;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
 	float ShieldChargeLevel;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)

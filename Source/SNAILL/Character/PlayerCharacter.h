@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
+#include "SNAILL/Enums/ESuperchargeState.h"
 #include "SNAILL/Framework/SNAILLPlayerController.h"
 #include "SNAILL/Gameplay/Weapons/WeaponBase.h"
 
@@ -59,7 +60,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_IsPlayerDead)
 		bool bIsPlayerDead;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		float SpeedFactorMultiplier;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		float DefaultWalkSpeed;
@@ -74,8 +75,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		AWeaponBase* CurrentWeapon;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing=OnRep_IsSuperchargeReady)
-		bool bIsSuperchargeReady;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing=OnRep_SuperchargeState)
+		ESuperchargeState SuperchargeState;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
+	ESuperchargeState PreviousSuperchargeState;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
 		int32 SuperchargeDelay;
 
@@ -98,10 +101,10 @@ protected:
 	virtual void FellOutOfWorld(const UDamageType& dmgType) override;
 
 	UFUNCTION()
-		void OnRep_IsSuperchargeReady();
-	UFUNCTION()
+		void OnRep_SuperchargeState();
+	UFUNCTION(BlueprintCallable)
 		void OnRep_ShieldBattery();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void OnRep_ShieldMaxBattery();
 
 	UFUNCTION()
@@ -140,8 +143,6 @@ protected:
 		void Server_EndSprinting();
 	UFUNCTION()
 		void EnableShield();
-	UFUNCTION()
-		void DisableShield();
 	
 	
 	UFUNCTION(BlueprintCallable)
@@ -179,8 +180,6 @@ public:
 		void Server_BeginShootingSpecial();
 	UFUNCTION(Server, Reliable)
 		void Server_EnableShield();
-	UFUNCTION(Server, Reliable)
-		void Server_DisableShield();
 			
 	UFUNCTION(Server, Reliable)
 		void Server_DoRotationVertical(float val);
@@ -210,6 +209,8 @@ public:
 		
 	UFUNCTION(Client, Reliable)
 		void DisplayBasicUI();
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void Client_ChangeWalkSpeed(float newWalkSpeed);
 
 	UFUNCTION(BlueprintCallable)
 		void SetPlayerHealth(float newHealth);
