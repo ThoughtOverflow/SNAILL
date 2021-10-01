@@ -34,6 +34,7 @@ APlayerCharacter::APlayerCharacter()
 
 	playerMaxHealth = 100.f;
 	playerHealth = 100.f;
+	playerPrevHealth = 100.f;
 	SuperchargeDelay = 120;
 	ShieldMaxLevel = 100.f; // Shield Max Time = ShleidMaxLevel / 20;
 	ShieldBatteryLevel = 50.f; // Shield Time = ShieldBatteryLevel / 20;
@@ -93,6 +94,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, ShieldMaxLevel);
 	DOREPLIFETIME(APlayerCharacter, bIsShieldBarRed);
 	DOREPLIFETIME(APlayerCharacter, SpeedFactorMultiplier);
+	DOREPLIFETIME(APlayerCharacter, playerPrevHealth);
 	
 }
 
@@ -148,7 +150,10 @@ void APlayerCharacter::OnSuperchargeFinished()
 
 void APlayerCharacter::StartSuperchargeTimer_Implementation()
 {
-	GetWorldTimerManager().SetTimer(SuperchargeTimer, this, &APlayerCharacter::OnSuperchargeFinished, SuperchargeDelay, false);
+	if(!bIsUsingShield)
+	{
+		GetWorldTimerManager().SetTimer(SuperchargeTimer, this, &APlayerCharacter::OnSuperchargeFinished, SuperchargeDelay, false);
+	}
 }
 
 // Called every frame
@@ -473,7 +478,11 @@ void APlayerCharacter::OnRep_PlayerHealth()
 			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
 			// PlayerController->PlayerBasicUIWidget->SuperchargeState = false;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
-			BlinkHitWidget();
+			if(playerHealth < playerPrevHealth)
+			{
+				UE_LOG(LogTemp, Error, TEXT("BLINKED HIT WIDGET"));
+				BlinkHitWidget();
+			}
 			UE_LOG(LogTemp, Error, TEXT("HP: %f"), playerHealth);
 		}
 	}
@@ -488,7 +497,6 @@ void APlayerCharacter::OnRep_PlayerMaxHealth()
 			PlayerController->PlayerBasicUIWidget->PlayerHealth = playerHealth;
 			PlayerController->PlayerBasicUIWidget->PlayerMaxHealth = playerMaxHealth;
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
-			BlinkHitWidget();
 			UE_LOG(LogTemp, Error, TEXT("HP: %f"), playerHealth);
 		}
 	}
@@ -569,6 +577,7 @@ void APlayerCharacter::SetPlayerHealth(float newHealth)
 	if(HasAuthority())
 	{
 		float h = FMath::Clamp(newHealth, 0.f, playerMaxHealth);
+		playerPrevHealth = playerHealth;
 		playerHealth = h;
 		OnRep_PlayerHealth();
 		if(playerHealth == 0)
@@ -604,7 +613,13 @@ void APlayerCharacter::ShieldTimerHit()
 				SuperchargeState = PreviousSuperchargeState;
 				if(PreviousSuperchargeState == ESuperchargeState::ESS_Discharged)
 				{
-					GetWorldTimerManager().UnPauseTimer(SuperchargeTimer);
+					if(GetWorldTimerManager().TimerExists(SuperchargeTimer))
+					{
+						GetWorldTimerManager().UnPauseTimer(SuperchargeTimer);
+					}else
+					{
+						StartSuperchargeTimer();
+					}
 				}
 				OnRep_SuperchargeState();
 				

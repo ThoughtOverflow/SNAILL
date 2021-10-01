@@ -152,6 +152,8 @@ protected:
 	float playerHealth;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, ReplicatedUsing = OnRep_PlayerMaxHealth)
 	float playerMaxHealth;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Replicated)
+	float playerPrevHealth;
 	UPROPERTY(BlueprintReadWrite)
 		FTimerHandle SuperchargeTimer;
 	UPROPERTY(BlueprintReadWrite)
