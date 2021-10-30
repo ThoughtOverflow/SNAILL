@@ -480,10 +480,13 @@ void APlayerCharacter::OnRep_PlayerHealth()
 			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 			if(playerHealth < playerPrevHealth)
 			{
-				UE_LOG(LogTemp, Error, TEXT("BLINKED HIT WIDGET"));
-				BlinkHitWidget();
+				if(IsLocallyControlled())
+				{
+					UE_LOG(LogTemp, Error, TEXT("BLINKED HIT WIDGET"));
+					BlinkHitWidget();
+				}
 			}
-			UE_LOG(LogTemp, Error, TEXT("HP: %f"), playerHealth);
+			UE_LOG(LogTemp, Error, TEXT("This Ran on: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
 		}
 	}
 }

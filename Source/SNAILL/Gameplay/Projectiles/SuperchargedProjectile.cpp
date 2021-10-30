@@ -43,7 +43,9 @@ void ASuperchargedProjectile::OnImpact(UPrimitiveComponent* OverlappedComponent,
     				UE_LOG(LogTemp, Warning, TEXT("Calling Damage Handler"));
     				Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), OtherActor, projectileDamage, bCanDamageAllies);
     				DoAoEDamage();
+    				DetachParticleSystem();
     				this->Destroy();
+    				UE_LOG(LogTemp, Warning, TEXT("KILLED"));
     			}
     		}else
     		{
@@ -70,7 +72,9 @@ void ASuperchargedProjectile::OnBlock(UPrimitiveComponent* HitComponent, AActor*
 		{
 				UE_LOG(LogTemp, Warning, TEXT("Block Destroy"));
 				DoAoEDamage();
+				DetachParticleSystem();
 				this->Destroy();
+				UE_LOG(LogTemp, Warning, TEXT("KILLED"));
 		}	
 	
 }

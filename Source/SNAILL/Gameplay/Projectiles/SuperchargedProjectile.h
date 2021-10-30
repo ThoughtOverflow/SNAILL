@@ -34,7 +34,9 @@ public:
 	virtual void OnBlock(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 
 	UFUNCTION(BlueprintImplementableEvent)
-		void RunParticles(float SphereRadius);
+	void RunParticles(float SphereRadius);
+	UFUNCTION(BlueprintImplementableEvent)
+	void DetachParticleSystem();
 
 	UFUNCTION(Client, Reliable)
 		void Client_RunParticles();
