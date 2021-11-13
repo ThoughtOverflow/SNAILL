@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "SNAILL/Enums/ESuperchargeState.h"
 #include "SNAILL/Framework/SNAILLPlayerController.h"
+#include "SNAILL/Gameplay/Placeables/CubeBomb.h"
 #include "SNAILL/Gameplay/Weapons/WeaponBase.h"
 
 #include "PlayerCharacter.generated.h"
@@ -91,6 +92,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		bool bIsShieldBarRed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapons")
+		TSubclassOf<ACubeBomb> CubeBomb;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -143,6 +147,10 @@ protected:
 		void Server_EndSprinting();
 	UFUNCTION()
 		void EnableShield();
+	UFUNCTION(BlueprintCallable)
+		void PlaceBomb();
+	UFUNCTION(Server, Reliable)
+		void Server_PlaceBomb();
 	
 	
 	UFUNCTION(BlueprintCallable)

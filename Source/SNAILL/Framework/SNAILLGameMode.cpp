@@ -245,3 +245,9 @@ void ASNAILLGameMode::EndGame(EGameTeams WinningTeam)
 	}
 	
 }
+
+void ASNAILLGameMode::SetKillerDataForEnemy(APlayerCharacter* Player, FString DamageDealerName)
+{
+	Player->GetPlayerState<ASNAILLPlayerState>()->KillerName = DamageDealerName;
+	Player->GetPlayerState<ASNAILLPlayerState>()->ForceNetUpdate();
+}

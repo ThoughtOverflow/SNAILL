@@ -10,6 +10,7 @@
 #include "Net/UnrealNetwork.h"
 #include "SNAILL/Framework/SNAILLGameMode.h"
 #include "SNAILL/Framework/SNAILLPlayerState.h"
+#include "SNAILL/Gameplay/Placeables/CubeBomb.h"
 
 FInteractionData::FInteractionData()
 {
@@ -400,6 +401,47 @@ void APlayerCharacter::EnableShield()
 
 }
 
+void APlayerCharacter::PlaceBomb()
+{
+	if(HasAuthority())
+	{
+		if(CubeBomb==nullptr) return;
+		
+		FHitResult HitResult;
+		FVector StartLocation;
+		FRotator StartRotation;
+
+		if (GetController() == nullptr) return;
+	
+		GetController()->GetPlayerViewPoint(StartLocation, StartRotation);
+	
+		FVector EndLocation = StartLocation + StartRotation.Vector() * 1000.f;
+
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+	
+		UWorld* World = GetWorld();
+		if (World->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, QueryParams))
+		{
+			if(HitResult.GetActor())
+			{
+				ACubeBomb* Bomb =  World->SpawnActor<ACubeBomb>(CubeBomb, HitResult.ImpactPoint, FRotator(0.f,0.f,0.f));
+				Bomb->SetActorRelativeRotation(HitResult.ImpactNormal.Rotation() + FRotator::MakeFromEuler(FVector(0.f,-90.f,0.f)));
+				Bomb->InitializeExplosive(TryGetPlayerController());
+			}
+		}
+		
+	}else
+	{
+		Server_PlaceBomb();
+	}
+}
+
+void APlayerCharacter::Server_PlaceBomb_Implementation()
+{
+	PlaceBomb();
+}
+
 void APlayerCharacter::Client_ChangeWalkSpeed_Implementation(float newWalkSpeed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = newWalkSpeed;
@@ -549,6 +591,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::BeginSprinting);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::EndSprinting);
 	PlayerInputComponent->BindAction("ActivateShield", IE_Pressed, this, &APlayerCharacter::EnableShield);
+	PlayerInputComponent->BindAction("ToggleBomb", IE_Pressed, this, &APlayerCharacter::PlaceBomb);
 
 }
 

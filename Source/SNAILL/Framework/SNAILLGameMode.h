@@ -48,6 +48,8 @@ public:
 		void Respawn(ASNAILLPlayerController* PlayerToRespawn);
 	UFUNCTION(BlueprintCallable)
 		void EndGame(EGameTeams WinningTeam);
+	UFUNCTION(BlueprintCallable)
+		void SetKillerDataForEnemy(APlayerCharacter* Player, FString DamageDealerName);
 	
 	
 };
