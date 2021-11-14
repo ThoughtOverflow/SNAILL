@@ -712,8 +712,6 @@ void APlayerCharacter::Server_MoveInDirection_Implementation(FVector MovementVec
 
 void APlayerCharacter::MovePlayerFromServer_Implementation(FVector MovementVector, float value)
 {
-
-	UE_LOG(LogNet, Warning, TEXT("Auth: %s"), HasAuthority() ? TEXT("Authority") : TEXT("Remote"));
 	
 	if(HasAuthority())
 	{

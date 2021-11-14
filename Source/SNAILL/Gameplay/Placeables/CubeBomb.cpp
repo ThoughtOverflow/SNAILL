@@ -55,9 +55,9 @@ ACubeBomb::ACubeBomb()
 void ACubeBomb::BeginPlay()
 {
 	Super::BeginPlay();
-	TriggerRadius->OnComponentBeginOverlap.AddDynamic(this, &ACubeBomb::OnTrigger);
 	DistanceBasedDamageMaxRadius->OnComponentBeginOverlap.AddDynamic(this, &ACubeBomb::InsidePullRange);
 	DistanceBasedDamageMaxRadius->OnComponentEndOverlap.AddDynamic(this, &ACubeBomb::OutsidePullRange);
+	TriggerRadius->OnComponentBeginOverlap.AddDynamic(this, &ACubeBomb::OnTrigger);
 }
 
 void ACubeBomb::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -90,11 +90,12 @@ void ACubeBomb::Tick(float DeltaTime)
 			{
 				FVector PullForce = (GetActorLocation() - Character->GetActorLocation());
 				PullForce.Normalize();
+				PullForce *= FVector(1.f,1.f,0.f);
 				//PullForce *= 50.f;
 				//PullForce += FVector(0.f,0.f,100.f);
 
 				//Cast<APlayerCharacter>(Character)->AddMovementInput(PullForce, 5.f);
-				
+				UE_LOG(LogTemp, Warning, TEXT("FCKN VECTOR: %s"), *PullForce.ToString());
 				Character->MovePlayerFromServer(PullForce, 0.55f);
 				
 			}
@@ -114,6 +115,13 @@ void ACubeBomb::TriggerExplosionEvent()
 {
 	if(HasAuthority())
 	{
+		for(auto& Character : PullablePlayers)
+		{
+			if(Character)
+			{
+				Character->bCanSprint = true;
+			}
+		}
 		TArray<AActor*> PlayerActors;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), PlayerActors);
 		for(auto& Player : PlayerActors)
@@ -124,16 +132,17 @@ void ACubeBomb::TriggerExplosionEvent()
 				//Kill the player;
 				APlayerCharacter* Character = Cast<APlayerCharacter>(Player);
 				Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->SetKillerDataForEnemy(Character, BombDeployer->GetPlayerState<ASNAILLPlayerState>()->PlayerName);
-				//Character->SetPlayerHealth(0);
+				Character->SetPlayerHealth(0);
 			
 			}else if(distance < DistanceBasedDamageMaxRadius->GetScaledSphereRadius())
 			{
 				APlayerCharacter* Character = Cast<APlayerCharacter>(Player);
 				//Deal damage accordingly;
-				float damageToDeal = FMath::Floor((DistanceBasedDamageMaxRadius->GetScaledSphereRadius() - InstakillDamageRadius->GetScaledSphereRadius() - (distance - InstakillDamageRadius->GetScaledSphereRadius())) * DamageOverDistanceMultiplier);
-				Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->SetKillerDataForEnemy(Character, BombDeployer->GetPlayerState<ASNAILLPlayerState>()->PlayerName);
-				//Character->ChangePlayerHealth(-1.f * damageToDeal);
-				UE_LOG(LogTemp, Warning, TEXT("Dealt damage: %f ~ Player Distance: %f ~ GradSphereRad: %f"), damageToDeal, distance, DistanceBasedDamageMaxRadius->GetScaledSphereRadius());
+				//
+				// float damageToDeal = FMath::Floor((DistanceBasedDamageMaxRadius->GetScaledSphereRadius() - InstakillDamageRadius->GetScaledSphereRadius() - (distance - InstakillDamageRadius->GetScaledSphereRadius())) * DamageOverDistanceMultiplier);
+				// Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->SetKillerDataForEnemy(Character, BombDeployer->GetPlayerState<ASNAILLPlayerState>()->PlayerName);
+				// Character->ChangePlayerHealth(-1.f * damageToDeal);
+				// UE_LOG(LogTemp, Warning, TEXT("Dealt damage: %f ~ Player Distance: %f ~ GradSphereRad: %f"), damageToDeal, distance, DistanceBasedDamageMaxRadius->GetScaledSphereRadius());
 			}
 			
 		}
@@ -172,6 +181,7 @@ void ACubeBomb::InitializeExplosive(ASNAILLPlayerController* Deployer)
 			UE_LOG(LogTemp, Warning, TEXT("TeamNone"));
 			break;
 		}
+		
 	}
 }
 
@@ -179,6 +189,12 @@ void ACubeBomb::StartCountdown()
 {
 	GetWorldTimerManager().SetTimer(DetonationTimer, this, &ACubeBomb::TriggerExplosionEvent, DetonationTimeCountdown, false);
 	bStartPull = true;
+	for(auto& Character : PullablePlayers)
+	{
+		Character->bCanSprint = false;
+		Character->Client_BlockSprinting();
+		Character->EndSprinting();
+	}
 }
 
 
@@ -187,6 +203,7 @@ void ACubeBomb::OnTrigger(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 {
 	if(HasAuthority())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());
 		if(EnemyTeam != EGameTeams::EGT_TeamNone && Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->GetPlayerTeam(Cast<APlayerCharacter>(OtherActor)->TryGetPlayerController()) == EnemyTeam)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("SnailCollector triggered!"));
@@ -195,7 +212,6 @@ void ACubeBomb::OnTrigger(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 				StartCountdown();
 				bISTriggered = true;
 				OnRep_Triggered();
-				
 			}
 			
 		}
@@ -211,10 +227,7 @@ void ACubeBomb::InsidePullRange(UPrimitiveComponent* OverlappedComponent, AActor
 		if(!PullablePlayers.Contains(Character))
 		{
 			PullablePlayers.Add(Character);
-			Character->bCanSprint = false;
-			Character->Client_BlockSprinting();
-			Character->EndSprinting();
-			UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());
+			//UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());			
 		}
 	}
 }
@@ -229,7 +242,7 @@ void ACubeBomb::OutsidePullRange(UPrimitiveComponent* OverlappedComponent, AActo
 		{
 			PullablePlayers.Remove(Character);
 			Character->bCanSprint = true;
-			UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());
+			//UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());
 		}
 		
 	}
