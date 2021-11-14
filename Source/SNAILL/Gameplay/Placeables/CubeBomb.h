@@ -11,6 +11,7 @@
 
 #include "CubeBomb.generated.h"
 
+class APlayerCharacter;
 class UInteractionComponent;
 
 UCLASS()
@@ -36,6 +37,13 @@ public:
 		UStaticMeshComponent* DamageRangeInicatorMesh;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties")
 		UStaticMeshComponent* InstakillRangeIndicatorMesh;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties", ReplicatedUsing = OnRep_Triggered)
+	
+		bool bISTriggered;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties", Replicated)
+		bool bStartPull;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties")
+		EGameTeams EnemyTeam;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties")
 		float DamageOverDistanceMultiplier;
@@ -44,6 +52,9 @@ public:
 		float DetonationTimeCountdown;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		ASNAILLPlayerController* BombDeployer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties", Replicated)
+		TArray<APlayerCharacter*> PullablePlayers;
 
 protected:
 	// Called when the game starts or when spawned
@@ -58,9 +69,19 @@ protected:
 
 	//------------
 
+	UFUNCTION()
+		void OnTrigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	UFUNCTION()
+		void InsidePullRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	UFUNCTION()
+		void OutsidePullRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+		void OnRep_Triggered();
 
 	UFUNCTION(BlueprintCallable)
 		void TriggerExplosionEvent();
@@ -69,5 +90,7 @@ public:
 		void Blueprint_BombPlaced();
 	UFUNCTION(BlueprintCallable)
 		void InitializeExplosive(ASNAILLPlayerController* Deployer);
+	UFUNCTION()
+		void StartCountdown();
 	
 };

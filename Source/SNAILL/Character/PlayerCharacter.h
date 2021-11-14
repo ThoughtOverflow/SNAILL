@@ -60,6 +60,8 @@ public:
 		bool bSprayAvailable;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_IsPlayerDead)
 		bool bIsPlayerDead;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
+		bool bCanSprint;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		float SpeedFactorMultiplier;
@@ -137,10 +139,6 @@ protected:
 		void BeginShooting();
 	UFUNCTION()
 		void BeginShootingSpecial();
-	UFUNCTION()
-		void BeginSprinting();
-	UFUNCTION()
-		void EndSprinting();
 	UFUNCTION(Server, Reliable)
 		void Server_BeginSprinting();
 	UFUNCTION(Server, Reliable)
@@ -152,9 +150,6 @@ protected:
 	UFUNCTION(Server, Reliable)
 		void Server_PlaceBomb();
 	
-	
-	UFUNCTION(BlueprintCallable)
-		ASNAILLPlayerController* TryGetPlayerController();
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Player Properties", ReplicatedUsing = OnRep_PlayerHealth)
 	float playerHealth;
@@ -175,6 +170,16 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void BeginSprinting();
+	UFUNCTION()
+		void EndSprinting();
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+		void Client_BlockSprinting();
+
+	UFUNCTION(BlueprintCallable)
+	ASNAILLPlayerController* TryGetPlayerController();
 	
 	UFUNCTION(Server, Reliable)
 		void Server_BeginInteract();
@@ -236,6 +241,11 @@ public:
 
 	UFUNCTION()
 		void ShieldTimerHit();
+
+	UFUNCTION(BlueprintCallable, Client, Reliable)
+		void MovePlayerFromServer(FVector MovementVector, float val);
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+		void Server_MoveInDirection(FVector MovementVector, float value);
 	
 
 };

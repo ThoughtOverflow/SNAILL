@@ -45,6 +45,7 @@ APlayerCharacter::APlayerCharacter()
 	SuperchargeState = ESuperchargeState::ESS_Discharged;
 	PreviousSuperchargeState = ESuperchargeState::ESS_Disabled;
 	bIsShieldBarRed = false;
+	bCanSprint = true;
 
 	//----------------COMPONENT INITIALIZATION------------
 
@@ -56,6 +57,8 @@ APlayerCharacter::APlayerCharacter()
 	PlayerCamera->SetFieldOfView(90);
 
 	//----------------------------------------------------
+
+	//DEBUG:
 	
 }
 
@@ -96,6 +99,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, bIsShieldBarRed);
 	DOREPLIFETIME(APlayerCharacter, SpeedFactorMultiplier);
 	DOREPLIFETIME(APlayerCharacter, playerPrevHealth);
+	DOREPLIFETIME(APlayerCharacter, bCanSprint);
 	
 }
 
@@ -162,7 +166,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CheckInteractable();
-	
 	
 }
 
@@ -358,7 +361,10 @@ void APlayerCharacter::BeginSprinting()
 	{
 		Server_BeginSprinting();
 	}
-	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed * RunningSpeedMultiplier * SpeedFactorMultiplier;
+	if(bCanSprint)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed * RunningSpeedMultiplier * SpeedFactorMultiplier;
+	}
 }
 
 void APlayerCharacter::EndSprinting()
@@ -368,6 +374,11 @@ void APlayerCharacter::EndSprinting()
 		Server_EndSprinting();
 	}
 	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed * SpeedFactorMultiplier;
+}
+
+void APlayerCharacter::Client_BlockSprinting_Implementation()
+{
+	EndSprinting();
 }
 
 void APlayerCharacter::Server_BeginSprinting_Implementation()
@@ -403,6 +414,7 @@ void APlayerCharacter::EnableShield()
 
 void APlayerCharacter::PlaceBomb()
 {
+	
 	if(HasAuthority())
 	{
 		if(CubeBomb==nullptr) return;
@@ -528,7 +540,6 @@ void APlayerCharacter::OnRep_PlayerHealth()
 					BlinkHitWidget();
 				}
 			}
-			UE_LOG(LogTemp, Error, TEXT("This Ran on: %s"), HasAuthority() ? TEXT("Server") : TEXT("Client"));
 		}
 	}
 }
@@ -693,6 +704,27 @@ void APlayerCharacter::ShieldTimerHit()
 		}	
 	}
 }
+
+void APlayerCharacter::Server_MoveInDirection_Implementation(FVector MovementVector, float value)
+{
+	AddMovementInput(MovementVector, value);
+}
+
+void APlayerCharacter::MovePlayerFromServer_Implementation(FVector MovementVector, float value)
+{
+
+	UE_LOG(LogNet, Warning, TEXT("Auth: %s"), HasAuthority() ? TEXT("Authority") : TEXT("Remote"));
+	
+	if(HasAuthority())
+	{
+		AddMovementInput(MovementVector, value);
+	}else
+	{
+		AddMovementInput(MovementVector, value);
+		Server_MoveInDirection(MovementVector, value);
+	}
+}
+
 
 void APlayerCharacter::DisplayBasicUI_Implementation()
 {
