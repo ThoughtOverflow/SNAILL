@@ -708,19 +708,24 @@ void APlayerCharacter::ShieldTimerHit()
 void APlayerCharacter::Server_MoveInDirection_Implementation(FVector MovementVector, float value)
 {
 	AddMovementInput(MovementVector, value);
+	UE_LOG(LogNet, Log, TEXT("Recall to server"));
 }
 
 void APlayerCharacter::MovePlayerFromServer_Implementation(FVector MovementVector, float value)
 {
+
+	// if(GetNetMode() == NM_DedicatedServer) return;
 	
 	if(HasAuthority())
 	{
 		AddMovementInput(MovementVector, value);
+		UE_LOG(LogNet, Error, TEXT("WHY ARE YOU RUNNIN'?"));
 	}else
 	{
 		AddMovementInput(MovementVector, value);
 		Server_MoveInDirection(MovementVector, value);
 	}
+	
 }
 
 

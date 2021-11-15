@@ -55,9 +55,11 @@ ACubeBomb::ACubeBomb()
 void ACubeBomb::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TriggerRadius->OnComponentBeginOverlap.AddDynamic(this, &ACubeBomb::OnTrigger);
 	DistanceBasedDamageMaxRadius->OnComponentBeginOverlap.AddDynamic(this, &ACubeBomb::InsidePullRange);
 	DistanceBasedDamageMaxRadius->OnComponentEndOverlap.AddDynamic(this, &ACubeBomb::OutsidePullRange);
-	TriggerRadius->OnComponentBeginOverlap.AddDynamic(this, &ACubeBomb::OnTrigger);
+	
 }
 
 void ACubeBomb::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -94,9 +96,8 @@ void ACubeBomb::Tick(float DeltaTime)
 				//PullForce *= 50.f;
 				//PullForce += FVector(0.f,0.f,100.f);
 
-				//Cast<APlayerCharacter>(Character)->AddMovementInput(PullForce, 5.f);
-				UE_LOG(LogTemp, Warning, TEXT("FCKN VECTOR: %s"), *PullForce.ToString());
 				Character->MovePlayerFromServer(PullForce, 0.55f);
+				
 				
 			}
 		}
@@ -181,7 +182,7 @@ void ACubeBomb::InitializeExplosive(ASNAILLPlayerController* Deployer)
 			UE_LOG(LogTemp, Warning, TEXT("TeamNone"));
 			break;
 		}
-		
+		CheckForInstantTrigger();
 	}
 }
 
@@ -203,7 +204,7 @@ void ACubeBomb::OnTrigger(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 {
 	if(HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());
+		
 		if(EnemyTeam != EGameTeams::EGT_TeamNone && Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->GetPlayerTeam(Cast<APlayerCharacter>(OtherActor)->TryGetPlayerController()) == EnemyTeam)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("SnailCollector triggered!"));
@@ -227,7 +228,14 @@ void ACubeBomb::InsidePullRange(UPrimitiveComponent* OverlappedComponent, AActor
 		if(!PullablePlayers.Contains(Character))
 		{
 			PullablePlayers.Add(Character);
-			//UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());			
+			if(bStartPull)
+			{
+				Character->bCanSprint = false;
+				Character->Client_BlockSprinting();
+				Character->EndSprinting();
+			}
+			
+			UE_LOG(LogTemp, Warning, TEXT("NumInside: %d"), PullablePlayers.Num());
 		}
 	}
 }
@@ -245,6 +253,26 @@ void ACubeBomb::OutsidePullRange(UPrimitiveComponent* OverlappedComponent, AActo
 			//UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());
 		}
 		
+	}
+}
+
+void ACubeBomb::CheckForInstantTrigger()
+{
+
+	if(!HasAuthority()) return;
+	
+	for(auto& Character : PullablePlayers)
+	{
+		if(TriggerRadius->IsOverlappingActor(Character) && Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->GetPlayerTeam(Character->TryGetPlayerController()) == EnemyTeam)
+		{
+			if(!bISTriggered)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Player already in range - triggering immediately."));
+				StartCountdown();
+				bISTriggered = true;
+				OnRep_Triggered();
+			}
+		}
 	}
 }
 

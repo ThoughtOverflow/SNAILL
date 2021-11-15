@@ -6,7 +6,7 @@
 
 ASNAILLPlayerState::ASNAILLPlayerState()
 {
-	PlayerName = "N/A";
+	PlayerName = "Player";
 	PlayerCurrentKills = 0;
 	KillerName = "someone";
 }
