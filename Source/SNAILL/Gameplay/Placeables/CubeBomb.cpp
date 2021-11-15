@@ -182,7 +182,7 @@ void ACubeBomb::InitializeExplosive(ASNAILLPlayerController* Deployer)
 			UE_LOG(LogTemp, Warning, TEXT("TeamNone"));
 			break;
 		}
-		CheckForInstantTrigger();
+		// CheckForInstantTrigger();
 	}
 }
 
@@ -256,23 +256,26 @@ void ACubeBomb::OutsidePullRange(UPrimitiveComponent* OverlappedComponent, AActo
 	}
 }
 
+DEPRECATED()
 void ACubeBomb::CheckForInstantTrigger()
 {
 
-	if(!HasAuthority()) return;
-	
-	for(auto& Character : PullablePlayers)
+	if(HasAuthority())
 	{
-		if(TriggerRadius->IsOverlappingActor(Character) && Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->GetPlayerTeam(Character->TryGetPlayerController()) == EnemyTeam)
+		for(auto& Character : PullablePlayers)
 		{
-			if(!bISTriggered)
+			if(TriggerRadius->IsOverlappingActor(Character) && Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->GetPlayerTeam(Character->TryGetPlayerController()) == EnemyTeam)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Player already in range - triggering immediately."));
-				StartCountdown();
-				bISTriggered = true;
-				OnRep_Triggered();
+				if(!bISTriggered)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Player already in range - triggering immediately."));
+					StartCountdown();
+					bISTriggered = true;
+					OnRep_Triggered();
+				}
 			}
 		}
 	}
+	
 }
 
