@@ -108,7 +108,15 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 					}
 					Cast<ASNAILLPlayerState>(ShooterPlayer->GetPlayerState())->PlayerCurrentKills++;
 					KilledPlayer->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
-					
+					if(!ShooterPlayer->bIsSnailCollectorAvailable)
+					{
+						ShooterPlayer->SnailCollectorKillRegistry++;
+						if(ShooterPlayer->SnailCollectorKillRegistry >= GetGameState<ASNAILLGameState>()->SnailCollectorKillRequirement)
+						{
+							ShooterPlayer->bIsSnailCollectorAvailable = true;
+							ShooterPlayer->Client_DisplaySnailCollectorAvailability();
+						}
+					}
 				}
 				
 			}else
@@ -152,6 +160,15 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 						}
 						Cast<ASNAILLPlayerState>(ShooterPlayer->GetPlayerState())->PlayerCurrentKills++;
 						KilledPlayer->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+						if(!ShooterPlayer->bIsSnailCollectorAvailable)
+						{
+							ShooterPlayer->SnailCollectorKillRegistry++;
+							if(ShooterPlayer->SnailCollectorKillRegistry >= GetGameState<ASNAILLGameState>()->SnailCollectorKillRequirement)
+							{
+								ShooterPlayer->bIsSnailCollectorAvailable = true;
+								ShooterPlayer->Client_DisplaySnailCollectorAvailability();
+							}
+						}
 					}
 				}
 			}

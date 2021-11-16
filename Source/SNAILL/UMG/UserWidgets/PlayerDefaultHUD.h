@@ -38,5 +38,7 @@ class SNAILL_API UPlayerDefaultHUD : public UUserWidget
 		void OnWidgetRefreshRequestCreated();
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 		void FlashDamageIndicator(float maskValue);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+		void DisplayBombAvailability();
 	
 };

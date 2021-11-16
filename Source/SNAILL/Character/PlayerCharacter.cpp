@@ -39,6 +39,7 @@ APlayerCharacter::APlayerCharacter()
 	SuperchargeDelay = 120;
 	ShieldMaxLevel = 100.f; // Shield Max Time = ShleidMaxLevel / 20;
 	ShieldBatteryLevel = 50.f; // Shield Time = ShieldBatteryLevel / 20;
+	SnailCollectorKillRegistry = 0;
 
 	bSprayAvailable = false;
 	bIsPlayerDead = false;
@@ -46,6 +47,7 @@ APlayerCharacter::APlayerCharacter()
 	PreviousSuperchargeState = ESuperchargeState::ESS_Disabled;
 	bIsShieldBarRed = false;
 	bCanSprint = true;
+	bIsSnailCollectorAvailable = false;
 	bEnableGravPull = false;
 	
 	//----------------COMPONENT INITIALIZATION------------
@@ -105,6 +107,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, playerPrevHealth);
 	DOREPLIFETIME(APlayerCharacter, bCanSprint);
 	DOREPLIFETIME(APlayerCharacter, bEnableGravPull);
+	DOREPLIFETIME(APlayerCharacter, bIsSnailCollectorAvailable);
 	
 }
 
@@ -433,7 +436,7 @@ void APlayerCharacter::PlaceBomb()
 	
 	if(HasAuthority())
 	{
-		if(CubeBomb==nullptr) return;
+		if(CubeBomb==nullptr || !bIsSnailCollectorAvailable) return;
 		
 		FHitResult HitResult;
 		FVector StartLocation;
@@ -456,12 +459,26 @@ void APlayerCharacter::PlaceBomb()
 				ACubeBomb* Bomb =  World->SpawnActor<ACubeBomb>(CubeBomb, HitResult.ImpactPoint, FRotator(0.f,0.f,0.f));
 				Bomb->SetActorRelativeRotation(HitResult.ImpactNormal.Rotation() + FRotator::MakeFromEuler(FVector(0.f,-90.f,0.f)));
 				Bomb->InitializeExplosive(TryGetPlayerController());
+				bIsSnailCollectorAvailable = false;
+				SnailCollectorKillRegistry = 0;
 			}
 		}
 		
 	}else
 	{
 		Server_PlaceBomb();
+	}
+}
+
+void APlayerCharacter::Client_DisplaySnailCollectorAvailability_Implementation()
+{
+	//TODO: Show that snail collector is available;
+	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
+	{
+		if(PlayerController->PlayerBasicUIWidget) {
+			PlayerController->PlayerBasicUIWidget->DisplayBombAvailability();
+			PlayerController->PlayerBasicUIWidget->RefreshWidget();
+		}
 	}
 }
 

@@ -35,6 +35,8 @@ public:
 	//Game Default Rules:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
 	int32 MaxKillCountToWin;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
+	int32 SnailCollectorKillRequirement;
 
 protected:
 

@@ -62,6 +62,10 @@ public:
 		bool bIsPlayerDead;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
 		bool bCanSprint;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
+		bool bIsSnailCollectorAvailable;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
+		int32 SnailCollectorKillRegistry;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		float SpeedFactorMultiplier;
@@ -254,6 +258,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Client, Reliable)
 		void UpdateGravPush(FVector MovementVector, float val);
+
+	UFUNCTION(Client, Reliable)
+	void Client_DisplaySnailCollectorAvailability();
 	
 
 };

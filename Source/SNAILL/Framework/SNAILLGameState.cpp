@@ -12,6 +12,7 @@ ASNAILLGameState::ASNAILLGameState()
 	TeamAKillScore = 0;
 	TeamBKillScore = 0;
 	MaxKillCountToWin = 30;
+	SnailCollectorKillRequirement = 5;
 }
 
 void ASNAILLGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

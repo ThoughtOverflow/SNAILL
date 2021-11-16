@@ -93,7 +93,10 @@ void ACubeBomb::Tick(float DeltaTime)
 				PullForce *= FVector(1.f,1.f,0.f);
 				//PullForce *= 50.f;
 				//PullForce += FVector(0.f,0.f,100.f);
-
+				if(Character->bEnableGravPull == false)
+				{
+					Character->bEnableGravPull = true;
+				}
 				Character->UpdateGravPush(PullForce, 0.55f);
 				
 				
@@ -131,6 +134,19 @@ void ACubeBomb::TriggerExplosionEvent()
 				//Kill the player;
 				APlayerCharacter* Character = Cast<APlayerCharacter>(Player);
 				Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->SetKillerDataForEnemy(Character, BombDeployer->GetPlayerState<ASNAILLPlayerState>()->PlayerName);
+				switch (Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->GetPlayerTeam(Character->TryGetPlayerController()))
+				{
+					case EGameTeams::EGT_TeamA:
+						Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->TeamBKillScore++;
+					break;
+					case EGameTeams::EGT_TeamB:
+						Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->TeamAKillScore++;
+					break;
+					case EGameTeams::EGT_TeamNone:
+					break;
+						
+				}
+				
 				Character->SetPlayerHealth(0);
 			
 			}else if(distance < DistanceBasedDamageMaxRadius->GetScaledSphereRadius())
@@ -179,10 +195,7 @@ void ACubeBomb::InitializeExplosive(ASNAILLPlayerController* Deployer)
 			UE_LOG(LogTemp, Warning, TEXT("TeamNone"));
 			break;
 		}
-		StartCountdown();
-		bISTriggered = true;
-		OnRep_Triggered();
-		// CheckForInstantTrigger();
+		CheckForInstantTrigger();
 	}
 }
 
@@ -240,8 +253,9 @@ void ACubeBomb::InsidePullRange(UPrimitiveComponent* OverlappedComponent, AActor
 		if(!PullablePlayers.Contains(Character))
 		{
 			PullablePlayers.Add(Character);
-			if(Character->bEnableGravPull)
+			if(bISTriggered)
 			{
+				Character->bEnableGravPull = true;
 				Character->bCanSprint = false;
 				Character->Client_BlockSprinting();
 				Character->EndSprinting();
