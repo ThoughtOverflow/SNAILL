@@ -18,7 +18,6 @@ ACubeBomb::ACubeBomb()
 	PrimaryActorTick.bCanEverTick = true;
 
 	bISTriggered = false;
-	bStartPull = false;
 
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("Interaction"));
@@ -67,7 +66,6 @@ void ACubeBomb::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACubeBomb, bISTriggered);
-	DOREPLIFETIME(ACubeBomb, bStartPull);
 	DOREPLIFETIME(ACubeBomb, PullablePlayers);
 	
 }
@@ -86,7 +84,7 @@ void ACubeBomb::Tick(float DeltaTime)
 
 	if(HasAuthority())
 	{
-		if(bStartPull)
+		if(bISTriggered)
 		{
 			for(auto& Character : PullablePlayers)
 			{
@@ -96,7 +94,7 @@ void ACubeBomb::Tick(float DeltaTime)
 				//PullForce *= 50.f;
 				//PullForce += FVector(0.f,0.f,100.f);
 
-				Character->MovePlayerFromServer(PullForce, 0.55f);
+				Character->UpdateGravPush(PullForce, 0.55f);
 				
 				
 			}
@@ -145,9 +143,8 @@ void ACubeBomb::TriggerExplosionEvent()
 				// Character->ChangePlayerHealth(-1.f * damageToDeal);
 				// UE_LOG(LogTemp, Warning, TEXT("Dealt damage: %f ~ Player Distance: %f ~ GradSphereRad: %f"), damageToDeal, distance, DistanceBasedDamageMaxRadius->GetScaledSphereRadius());
 			}
-			
 		}
-		bStartPull = false;
+		ToggleGravPullForEachPlayer(false);
 		this->Destroy();
 	}
 	
@@ -182,6 +179,9 @@ void ACubeBomb::InitializeExplosive(ASNAILLPlayerController* Deployer)
 			UE_LOG(LogTemp, Warning, TEXT("TeamNone"));
 			break;
 		}
+		StartCountdown();
+		bISTriggered = true;
+		OnRep_Triggered();
 		// CheckForInstantTrigger();
 	}
 }
@@ -189,12 +189,24 @@ void ACubeBomb::InitializeExplosive(ASNAILLPlayerController* Deployer)
 void ACubeBomb::StartCountdown()
 {
 	GetWorldTimerManager().SetTimer(DetonationTimer, this, &ACubeBomb::TriggerExplosionEvent, DetonationTimeCountdown, false);
-	bStartPull = true;
+	ToggleGravPullForEachPlayer(true);
 	for(auto& Character : PullablePlayers)
 	{
 		Character->bCanSprint = false;
 		Character->Client_BlockSprinting();
 		Character->EndSprinting();
+	}
+}
+
+void ACubeBomb::ToggleGravPullForEachPlayer(bool bEnable)
+{
+	
+	for(auto& Character : PullablePlayers)
+	{
+		if(Character->HasAuthority())
+		{
+			Character->bEnableGravPull = bEnable;
+		}
 	}
 }
 
@@ -228,7 +240,7 @@ void ACubeBomb::InsidePullRange(UPrimitiveComponent* OverlappedComponent, AActor
 		if(!PullablePlayers.Contains(Character))
 		{
 			PullablePlayers.Add(Character);
-			if(bStartPull)
+			if(Character->bEnableGravPull)
 			{
 				Character->bCanSprint = false;
 				Character->Client_BlockSprinting();
@@ -249,6 +261,7 @@ void ACubeBomb::OutsidePullRange(UPrimitiveComponent* OverlappedComponent, AActo
 		if(PullablePlayers.Contains(Character))
 		{
 			PullablePlayers.Remove(Character);
+			Character->bEnableGravPull = false;
 			Character->bCanSprint = true;
 			//UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());
 		}
@@ -256,7 +269,7 @@ void ACubeBomb::OutsidePullRange(UPrimitiveComponent* OverlappedComponent, AActo
 	}
 }
 
-DEPRECATED()
+
 void ACubeBomb::CheckForInstantTrigger()
 {
 

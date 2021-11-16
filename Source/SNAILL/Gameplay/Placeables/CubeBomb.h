@@ -40,8 +40,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties", ReplicatedUsing = OnRep_Triggered)
 	
 		bool bISTriggered;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties", Replicated)
-		bool bStartPull;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties")
 		EGameTeams EnemyTeam;
 
@@ -94,5 +92,8 @@ public:
 		void InitializeExplosive(ASNAILLPlayerController* Deployer);
 	UFUNCTION()
 		void StartCountdown();
+
+	UFUNCTION()
+		void ToggleGravPullForEachPlayer(bool bEnable);
 	
 };

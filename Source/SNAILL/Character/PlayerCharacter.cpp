@@ -46,7 +46,8 @@ APlayerCharacter::APlayerCharacter()
 	PreviousSuperchargeState = ESuperchargeState::ESS_Disabled;
 	bIsShieldBarRed = false;
 	bCanSprint = true;
-
+	bEnableGravPull = false;
+	
 	//----------------COMPONENT INITIALIZATION------------
 
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
@@ -55,6 +56,9 @@ APlayerCharacter::APlayerCharacter()
 	PlayerCamera->SetRelativeRotation(FRotator(0.0f,90.f,-90.f));
 	PlayerCamera->bUsePawnControlRotation = true;
 	PlayerCamera->SetFieldOfView(90);
+
+	GravPushDirection = FVector::ZeroVector;
+	GravPushPower = 0.0f;
 
 	//----------------------------------------------------
 
@@ -100,6 +104,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, SpeedFactorMultiplier);
 	DOREPLIFETIME(APlayerCharacter, playerPrevHealth);
 	DOREPLIFETIME(APlayerCharacter, bCanSprint);
+	DOREPLIFETIME(APlayerCharacter, bEnableGravPull);
 	
 }
 
@@ -165,7 +170,18 @@ void APlayerCharacter::StartSuperchargeTimer_Implementation()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	CheckInteractable();
+	// CheckInteractable();
+	// if(IsLocallyControlled())
+	// {
+	// 	AddMovementInput(GetActorForwardVector(), 0.55f);
+	// }
+
+	//TIck grav pull: WTF
+
+	if(IsLocallyControlled() && bEnableGravPull)
+	{
+		AddMovementInput(GravPushDirection, GravPushPower);
+	}
 	
 }
 
@@ -705,27 +721,15 @@ void APlayerCharacter::ShieldTimerHit()
 	}
 }
 
-void APlayerCharacter::Server_MoveInDirection_Implementation(FVector MovementVector, float value)
+void APlayerCharacter::UpdateGravPush_Implementation(FVector MovementVector, float val)
 {
-	AddMovementInput(MovementVector, value);
-	UE_LOG(LogNet, Log, TEXT("Recall to server"));
-}
-
-void APlayerCharacter::MovePlayerFromServer_Implementation(FVector MovementVector, float value)
-{
-
 	// if(GetNetMode() == NM_DedicatedServer) return;
 	
-	if(HasAuthority())
+	if(IsLocallyControlled())
 	{
-		AddMovementInput(MovementVector, value);
-		UE_LOG(LogNet, Error, TEXT("WHY ARE YOU RUNNIN'?"));
-	}else
-	{
-		AddMovementInput(MovementVector, value);
-		Server_MoveInDirection(MovementVector, value);
+		GravPushDirection = MovementVector;
+		GravPushPower = val;
 	}
-	
 }
 
 

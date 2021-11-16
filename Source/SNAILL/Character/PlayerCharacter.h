@@ -69,7 +69,10 @@ public:
 		float DefaultWalkSpeed;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float RunningSpeedMultiplier;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
+	bool bEnableGravPull;
+	
 	//Weapon Stuff:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapons")
@@ -97,6 +100,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapons")
 		TSubclassOf<ACubeBomb> CubeBomb;
+
+	
 	
 protected:
 	// Called when the game starts or when spawned
@@ -165,6 +170,11 @@ protected:
 		void OnSuperchargeFinished();
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 		void StartSuperchargeTimer();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		FVector GravPushDirection;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		float GravPushPower;
 	
 
 public:	
@@ -243,9 +253,7 @@ public:
 		void ShieldTimerHit();
 
 	UFUNCTION(BlueprintCallable, Client, Reliable)
-		void MovePlayerFromServer(FVector MovementVector, float val);
-	UFUNCTION(BlueprintCallable, Server, Reliable)
-		void Server_MoveInDirection(FVector MovementVector, float value);
+		void UpdateGravPush(FVector MovementVector, float val);
 	
 
 };
