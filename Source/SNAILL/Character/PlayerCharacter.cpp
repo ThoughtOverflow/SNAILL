@@ -115,6 +115,18 @@ void APlayerCharacter::FellOutOfWorld(const UDamageType& dmgType)
 {
 	if(HasAuthority())
 	{
+		switch (Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->GetPlayerTeam(TryGetPlayerController()))
+		{
+		case EGameTeams::EGT_TeamA:
+			Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->ChangeTeamScore(EGameTeams::EGT_TeamB, 1);
+			break;
+		case EGameTeams::EGT_TeamB:
+			Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->ChangeTeamScore(EGameTeams::EGT_TeamA, 1);
+			break;
+		case EGameTeams::EGT_TeamNone:
+			break;
+						
+		}
 		Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->Respawn(Cast<ASNAILLPlayerController>(GetController()));
 	}
 }
@@ -173,12 +185,9 @@ void APlayerCharacter::StartSuperchargeTimer_Implementation()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	// CheckInteractable();
-	// if(IsLocallyControlled())
-	// {
-	// 	AddMovementInput(GetActorForwardVector(), 0.55f);
-	// }
-
+	
+	CheckInteractable();
+	
 	//TIck grav pull: WTF
 
 	if(IsLocallyControlled() && bEnableGravPull)
@@ -763,7 +772,6 @@ void APlayerCharacter::DisplayBasicUI_Implementation()
 			PlayerController->PlayerBasicUIWidget->ShieldChargeLevel = ShieldBatteryLevel;
 			PlayerController->PlayerBasicUIWidget->ShieldMaxLevel = ShieldMaxLevel;
 			PlayerController->PlayerBasicUIWidget->bIsShieldBarRed = bIsShieldBarRed;
-			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 		}
 	}
 }

@@ -122,6 +122,7 @@ void ACubeBomb::TriggerExplosionEvent()
 			if(Character)
 			{
 				Character->bCanSprint = true;
+				Character->PlayerAirBoostPower = 900.f;
 			}
 		}
 		TArray<AActor*> PlayerActors;
@@ -206,6 +207,7 @@ void ACubeBomb::StartCountdown()
 	for(auto& Character : PullablePlayers)
 	{
 		Character->bCanSprint = false;
+		Character->PlayerAirBoostPower = 100.f;
 		Character->Client_BlockSprinting();
 		Character->EndSprinting();
 	}
@@ -257,6 +259,7 @@ void ACubeBomb::InsidePullRange(UPrimitiveComponent* OverlappedComponent, AActor
 			{
 				Character->bEnableGravPull = true;
 				Character->bCanSprint = false;
+				Character->PlayerAirBoostPower = 100.f;
 				Character->Client_BlockSprinting();
 				Character->EndSprinting();
 			}
@@ -277,6 +280,7 @@ void ACubeBomb::OutsidePullRange(UPrimitiveComponent* OverlappedComponent, AActo
 			PullablePlayers.Remove(Character);
 			Character->bEnableGravPull = false;
 			Character->bCanSprint = true;
+			Character->PlayerAirBoostPower = 900.f;
 			//UE_LOG(LogTemp, Warning, TEXT("Num: %d"), PullablePlayers.Num());
 		}
 		

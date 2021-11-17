@@ -29,6 +29,8 @@ public:
 
 protected:
 
+	virtual void Logout(AController* Exiting) override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		TSubclassOf<APlayerCharacter> TeamACharacter;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

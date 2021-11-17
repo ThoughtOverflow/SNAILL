@@ -10,6 +10,30 @@ ASNAILLGameMode::ASNAILLGameMode()
 {
 }
 
+void ASNAILLGameMode::Logout(AController* Exiting)
+{
+	if(ASNAILLPlayerController* C = Cast<ASNAILLPlayerController>(Exiting))
+	{
+		Super::Logout(Exiting);
+		UE_LOG(LogTemp, Warning, TEXT("EXIT"));
+		switch (GetGameState<ASNAILLGameState>()->GetPlayerTeam(C))
+		{
+		case EGameTeams::EGT_TeamA:
+				GetGameState<ASNAILLGameState>()->TeamAPlayers.Remove(C);
+			break;
+		case EGameTeams::EGT_TeamB:
+			GetGameState<ASNAILLGameState>()->TeamAPlayers.Remove(C);
+			break;
+		case EGameTeams::EGT_TeamNone:
+			break;
+						
+		}
+		GetGameState<ASNAILLGameState>()->OnRep_TeamAPlayers();
+		GetGameState<ASNAILLGameState>()->OnRep_TeamBPlayers();
+		GetGameState<ASNAILLGameState>()->Client_RefreshTeamSelectionWidget();
+	}
+}
+
 void ASNAILLGameMode::JoinTeam(EGameTeams Team, ASNAILLPlayerController* Player)
 {
 	if(!SnailGameState)
@@ -80,12 +104,12 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 				TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
 				
 				//Double Check Kill Boolean:
-				if(KilledPlayer->bIsPlayerDead && ShooterTeam!=KilledTeam)
+				if(KilledPlayer->bIsPlayerDead)
 				{
 					//TODO: Kill Scoring Logic
 					switch (ShooterTeam)
 					{
-						case EGameTeams::EGT_TeamA:
+					case EGameTeams::EGT_TeamA:
 						SnailGameState->TeamAKillScore++;
 						SnailGameState->RefreshPlayerScoreIndicatorForServer();
 						if(SnailGameState->TeamAKillScore >= SnailGameState->MaxKillCountToWin)
@@ -94,7 +118,7 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 							return;
 						}
 						break;
-						case EGameTeams::EGT_TeamB:
+					case EGameTeams::EGT_TeamB:
 						SnailGameState->TeamBKillScore++;
 						SnailGameState->RefreshPlayerScoreIndicatorForServer();
 						if(SnailGameState->TeamBKillScore >= SnailGameState->MaxKillCountToWin)
@@ -103,9 +127,11 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 							return;
 						}
 						break;
-						case EGameTeams::EGT_TeamNone:
+					case EGameTeams::EGT_TeamNone:
 						break;
 					}
+					if(ShooterTeam!=KilledTeam) {
+						
 					Cast<ASNAILLPlayerState>(ShooterPlayer->GetPlayerState())->PlayerCurrentKills++;
 					KilledPlayer->GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
 					if(!ShooterPlayer->bIsSnailCollectorAvailable)
@@ -117,6 +143,8 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 							ShooterPlayer->Client_DisplaySnailCollectorAvailability();
 						}
 					}
+	
+				}
 				}
 				
 			}else

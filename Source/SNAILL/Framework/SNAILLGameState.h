@@ -38,14 +38,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
 	int32 SnailCollectorKillRequirement;
 
-protected:
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION()
 		void OnRep_TeamAPlayers();
 	UFUNCTION()
 		void OnRep_TeamBPlayers();
+
+protected:
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+
 	UFUNCTION()
 		void OnRep_TeamAKillScore();
 	UFUNCTION()
@@ -57,6 +60,7 @@ protected:
 		FOnPlayerHUDWidgetRefreshRequestCreated OnPlayerHUDWidgetRefreshRequestCreated;
 
 public:
+	
 
 	UFUNCTION(Client, Unreliable)
 		void Client_RefreshTeamSelectionWidget();
@@ -68,4 +72,5 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void ChangeTeamScore(EGameTeams Team, int32 deltaScore);
+	
 };
