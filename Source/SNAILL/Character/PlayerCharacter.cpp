@@ -108,6 +108,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, bCanSprint);
 	DOREPLIFETIME(APlayerCharacter, bEnableGravPull);
 	DOREPLIFETIME(APlayerCharacter, bIsSnailCollectorAvailable);
+	DOREPLIFETIME(APlayerCharacter, SnailCollectorKillRegistry);
 	
 }
 

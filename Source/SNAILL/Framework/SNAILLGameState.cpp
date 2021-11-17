@@ -25,6 +25,7 @@ void ASNAILLGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ASNAILLGameState, TeamAKillScore);
 	DOREPLIFETIME(ASNAILLGameState, TeamBKillScore);
 	DOREPLIFETIME(ASNAILLGameState, MaxKillCountToWin)
+	DOREPLIFETIME(ASNAILLGameState, SnailCollectorKillRequirement)
 }
 
 void ASNAILLGameState::OnRep_TeamAPlayers()
