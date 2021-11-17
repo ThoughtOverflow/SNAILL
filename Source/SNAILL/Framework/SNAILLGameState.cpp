@@ -70,6 +70,29 @@ EGameTeams ASNAILLGameState::GetPlayerTeam(ASNAILLPlayerController* Player)
 	
 }
 
+void ASNAILLGameState::ChangeTeamScore(EGameTeams Team, int32 deltaScore)
+{
+	if(HasAuthority())
+	{
+		switch (Team)
+		{
+			case EGameTeams::EGT_TeamA:
+				TeamAKillScore += deltaScore;
+			break;
+			case EGameTeams::EGT_TeamB:
+				TeamBKillScore += deltaScore;
+			break;
+			case EGameTeams::EGT_TeamNone:
+			break;
+		}
+		if(GetNetMode() != NM_DedicatedServer)
+		{
+			OnRep_TeamAKillScore();
+			OnRep_TeamBKillScore();
+		}
+	}
+}
+
 
 void ASNAILLGameState::Client_RefreshTeamSelectionWidget_Implementation()
 {

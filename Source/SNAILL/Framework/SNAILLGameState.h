@@ -65,4 +65,7 @@ public:
 	//Weird Server Move:
 	UFUNCTION(BlueprintCallable)
 		EGameTeams GetPlayerTeam(ASNAILLPlayerController* Player);
+
+	UFUNCTION(BlueprintCallable)
+		void ChangeTeamScore(EGameTeams Team, int32 deltaScore);
 };

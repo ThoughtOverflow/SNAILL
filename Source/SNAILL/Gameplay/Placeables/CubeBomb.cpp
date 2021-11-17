@@ -137,10 +137,10 @@ void ACubeBomb::TriggerExplosionEvent()
 				switch (Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->GetPlayerTeam(Character->TryGetPlayerController()))
 				{
 					case EGameTeams::EGT_TeamA:
-						Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->TeamBKillScore++;
+						Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->ChangeTeamScore(EGameTeams::EGT_TeamB, 1);
 					break;
 					case EGameTeams::EGT_TeamB:
-						Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->TeamAKillScore++;
+						Cast<ASNAILLGameState>(UGameplayStatics::GetGameState(GetWorld()))->ChangeTeamScore(EGameTeams::EGT_TeamA, 1);
 					break;
 					case EGameTeams::EGT_TeamNone:
 					break;
