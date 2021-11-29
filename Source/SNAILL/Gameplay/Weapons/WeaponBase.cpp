@@ -27,6 +27,7 @@ AWeaponBase::AWeaponBase()
 	fireTime = -1;
 
 	bCanWeaponShoot = true;
+	bPreReloadFireState = bCanWeaponShoot;
 	reloadTime = 2.f;
 	ammoDiff = 0.f;
 
@@ -62,6 +63,7 @@ void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AWeaponBase, TotalAmmoCapacity);
 	DOREPLIFETIME(AWeaponBase, ClipCapacity);
 	DOREPLIFETIME(AWeaponBase, bCanWeaponShoot);
+	DOREPLIFETIME(AWeaponBase, bPreReloadFireState);
 	DOREPLIFETIME(AWeaponBase, reloadTime);
 	DOREPLIFETIME(AWeaponBase, ReloadTimer);
 	DOREPLIFETIME(AWeaponBase, ammoDiff);
@@ -238,6 +240,7 @@ bool AWeaponBase::TryReload()
 			ammoDiff = ClipCapacity - CurrentClipAmmo;
 			if(TotalAmmo > 0)
 			{
+				bPreReloadFireState = bCanWeaponShoot;
 				bCanWeaponShoot = false;
 				GetWorldTimerManager().SetTimer(ReloadTimer, this, &AWeaponBase::ReloadTimerHit, reloadTime, false);
 				return true;
@@ -258,7 +261,7 @@ void AWeaponBase::ReloadTimerHit()
 		CurrentClipAmmo += TotalAmmo;
 		TotalAmmo = 0;
 	}
-	bCanWeaponShoot = true;
+	bCanWeaponShoot = bPreReloadFireState;
 	OnRep_AmmoCount();
 	OnRep_AmmoInOneMag();
 }

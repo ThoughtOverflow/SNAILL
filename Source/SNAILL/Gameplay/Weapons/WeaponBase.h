@@ -44,6 +44,8 @@ public:
 		float reloadTime;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		bool bCanWeaponShoot;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
+		bool bPreReloadFireState;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties", meta = (ClampMin = 0.0f, ClampMax = 1.0f))
 		float reloadAlertPercentage;
