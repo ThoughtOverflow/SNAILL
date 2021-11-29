@@ -102,6 +102,19 @@ void AWeaponBase::OnRep_AmmoInOneMag()
 	}
 }
 
+void AWeaponBase::ReinitWeapon()
+{
+	if(HasAuthority())
+	{
+		CurrentClipAmmo = ClipCapacity;
+		TotalAmmo = TotalAmmoCapacity-ClipCapacity;
+		OnRep_AmmoCount();
+		OnRep_AmmoInOneMag();
+		UE_LOG(LogTemp, Warning, TEXT("Reset default ammo variables for weapon."));
+	}
+	ammoAlertTreshold = ClipCapacity * reloadAlertPercentage;
+}
+
 void AWeaponBase::Multicast_SpawnMuzzleParticle_Implementation()
 {
 	SpawnMuzzleParticle();

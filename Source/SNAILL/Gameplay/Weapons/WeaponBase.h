@@ -52,6 +52,9 @@ public:
 		void OnRep_AmmoCount();
 	UFUNCTION()
 		void OnRep_AmmoInOneMag();
+
+	UFUNCTION(BlueprintCallable)
+		void ReinitWeapon();
 	
 protected:
 	// Called when the game starts or when spawned

@@ -465,6 +465,7 @@ void APlayerCharacter::EnableShield()
 			SuperchargeState = ESuperchargeState::ESS_Disabled;
 			OnRep_SuperchargeState();
 			GetWorldTimerManager().PauseTimer(SuperchargeTimer);
+			if(CurrentWeapon) CurrentWeapon->bCanWeaponShoot = false;
 		}
 		
 	}
@@ -765,6 +766,8 @@ void APlayerCharacter::ShieldTimerHit()
 					}
 				}
 				OnRep_SuperchargeState();
+
+				if(CurrentWeapon) CurrentWeapon->bCanWeaponShoot = true;
 				
 			}else
 			{
