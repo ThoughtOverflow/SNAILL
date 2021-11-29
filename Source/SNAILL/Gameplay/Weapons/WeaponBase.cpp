@@ -30,6 +30,8 @@ AWeaponBase::AWeaponBase()
 	reloadTime = 2.f;
 	ammoDiff = 0.f;
 
+	reloadAlertPercentage = 0.1f;
+
 }
 
 // Called when the game starts or when spawned
@@ -44,6 +46,7 @@ void AWeaponBase::BeginPlay()
 		OnRep_AmmoInOneMag();
 		UE_LOG(LogTemp, Warning, TEXT("Set Default ammo variables for weapon"));
 	}
+	ammoAlertTreshold = ClipCapacity * reloadAlertPercentage;
 }
 
 void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -82,6 +85,19 @@ void AWeaponBase::OnRep_AmmoInOneMag()
 		if(ASNAILLPlayerController* C = OwningCharacter->TryGetPlayerController())
 		{
 			C->Client_RefreshPlayerAmmoCount(CurrentClipAmmo, TotalAmmo);
+			if(CurrentClipAmmo <= ammoAlertTreshold && TotalAmmo >= ammoAlertTreshold)
+			{
+				if(C->PlayerBasicUIWidget)
+				{
+					C->PlayerBasicUIWidget->ToggleReloadAlert(true);
+				}
+			}else
+			{
+				if(C->PlayerBasicUIWidget)
+				{
+					C->PlayerBasicUIWidget->ToggleReloadAlert(false);
+				}
+			}
 		}
 	}
 }
@@ -209,6 +225,7 @@ bool AWeaponBase::TryReload()
 			ammoDiff = ClipCapacity - CurrentClipAmmo;
 			if(TotalAmmo > 0)
 			{
+				bCanWeaponShoot = false;
 				GetWorldTimerManager().SetTimer(ReloadTimer, this, &AWeaponBase::ReloadTimerHit, reloadTime, false);
 				return true;
 			}
@@ -228,6 +245,7 @@ void AWeaponBase::ReloadTimerHit()
 		CurrentClipAmmo += TotalAmmo;
 		TotalAmmo = 0;
 	}
+	bCanWeaponShoot = true;
 	OnRep_AmmoCount();
 	OnRep_AmmoInOneMag();
 }

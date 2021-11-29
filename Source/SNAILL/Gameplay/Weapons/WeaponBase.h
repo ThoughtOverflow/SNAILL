@@ -45,6 +45,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		bool bCanWeaponShoot;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties", meta = (ClampMin = 0.0f, ClampMax = 1.0f))
+		float reloadAlertPercentage;
+	
 	UFUNCTION()
 		void OnRep_AmmoCount();
 	UFUNCTION()
@@ -67,6 +70,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Replicated)
 		float ammoDiff;
 
+	UPROPERTY(BlueprintReadOnly)
+		float ammoAlertTreshold;
+	
 	UFUNCTION()
 		void ReloadTimerHit();
 
