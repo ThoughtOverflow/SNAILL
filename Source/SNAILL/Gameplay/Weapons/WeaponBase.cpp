@@ -9,6 +9,7 @@
 #include "SNAILL/Character/PlayerCharacter.h"
 #include "SNAILL/Gameplay/Projectiles/Projectile.h"
 #include "DrawDebugHelpers.h"
+#include "SNAILL/Framework/SNAILLGameState.h"
 
 // Sets default values
 AWeaponBase::AWeaponBase()
@@ -20,13 +21,24 @@ AWeaponBase::AWeaponBase()
 	WeaponMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMeshComponent"));
 	SetRootComponent(WeaponMeshComponent);
 
+	TotalAmmoCapacity = 500;
+	ClipCapacity = 30;
+	fireRate = 460;
+	fireTime = -1;
+
 }
 
 // Called when the game starts or when spawned
 void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if(HasAuthority())
+	{
+		CurrentClipAmmo = ClipCapacity;
+		TotalAmmo = TotalAmmoCapacity-ClipCapacity;
+		OnRep_AmmoInOneMag();
+		UE_LOG(LogTemp, Warning, TEXT("Set Default ammo variables for weapon"));
+	}
 }
 
 void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -34,16 +46,29 @@ void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(AWeaponBase, AmmoCount);
-	DOREPLIFETIME(AWeaponBase, AmmoInOneMag);
+	DOREPLIFETIME(AWeaponBase, TotalAmmo);
+	DOREPLIFETIME(AWeaponBase, CurrentClipAmmo);
+	DOREPLIFETIME(AWeaponBase, fireRate);
+	DOREPLIFETIME(AWeaponBase, fireTime);
+	DOREPLIFETIME(AWeaponBase, ShootingTimer);
 }
 
 void AWeaponBase::OnRep_AmmoCount()
 {
+	UE_LOG(LogTemp, Warning, TEXT("I AM: %s"), *GetOwner()->GetName());
+	if(APlayerCharacter* OwningCharacter = Cast<APlayerCharacter>(GetOwner()))
+	{
+		OwningCharacter->TryGetPlayerController()->Client_RefreshPlayerAmmoCount(CurrentClipAmmo, TotalAmmo);
+	}
 }
 
 void AWeaponBase::OnRep_AmmoInOneMag()
 {
+	UE_LOG(LogTemp, Warning, TEXT("I AM: %s"), *GetOwner()->GetName());
+	if(APlayerCharacter* OwningCharacter = Cast<APlayerCharacter>(GetOwner()))
+	{
+		OwningCharacter->TryGetPlayerController()->Client_RefreshPlayerAmmoCount(CurrentClipAmmo, TotalAmmo);
+	}
 }
 
 void AWeaponBase::Multicast_SpawnMuzzleParticle_Implementation()
@@ -58,21 +83,50 @@ void AWeaponBase::Tick(float DeltaTime)
 
 }
 
+bool AWeaponBase::BeginShooting()
+{
+	if(HasAuthority())
+	{
+		if(CurrentClipAmmo >= 1)
+		{
+			fireTime = 1 / (float(fireRate) / 60);
+			UE_LOG(LogTemp, Warning, TEXT("Fire Time: %f"), fireTime);
+			if(fireTime != -1)
+			{
+				Shoot();
+				GetWorldTimerManager().SetTimer(ShootingTimer, this, &AWeaponBase::Shoot, fireTime, true);	
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+void AWeaponBase::EndShooting()
+{
+	if(HasAuthority())
+	{
+		GetWorldTimerManager().ClearTimer(ShootingTimer);
+	}
+}
+
 void AWeaponBase::Shoot()
 {
-	if(GetOwner()->HasAuthority())
+	if(HasAuthority() && GetOwner()->HasAuthority())
 	{
-		//SpawnMuzzleParticle();
-		Multicast_SpawnMuzzleParticle();
-		if(WeaponProjectile)
+		if(CurrentClipAmmo >= 1)
 		{
-			FVector Forward;
-			FRotator Rot;
-			//Cast<APlayerCharacter>(GetOwner())->GetActorEyesViewPoint(Forward, Rot);
-			FHitResult HitResult;
-			//FVector End = Forward + (Rot.Vector() * 1000.f);
-			Forward = Cast<APlayerCharacter>(GetOwner())->PlayerCamera->GetComponentLocation();
-			FVector End = Forward + (Cast<APlayerCharacter>(GetOwner())->GetController()->GetControlRotation().Vector() * 30000.f);
+			//SpawnMuzzleParticle();
+			Multicast_SpawnMuzzleParticle();
+			if(WeaponProjectile)
+			{
+				FVector Forward;
+				FRotator Rot;
+				//Cast<APlayerCharacter>(GetOwner())->GetActorEyesViewPoint(Forward, Rot);
+				FHitResult HitResult;
+				//FVector End = Forward + (Rot.Vector() * 1000.f);
+				Forward = Cast<APlayerCharacter>(GetOwner())->PlayerCamera->GetComponentLocation();
+				FVector End = Forward + (Cast<APlayerCharacter>(GetOwner())->GetController()->GetControlRotation().Vector() * 30000.f);
 				GetWorld()->LineTraceSingleByChannel(HitResult, Forward, End, ECC_Visibility);
 				//DrawDebugLine(GetWorld(), Forward, End, FColor(0, 255, 0), false, 10, 0, 1.5);
 				FVector HitPoint = HitResult.GetActor() ? HitResult.ImpactPoint : End;
@@ -83,6 +137,14 @@ void AWeaponBase::Shoot()
 				AProjectile* P = GetWorld()->SpawnActor<AProjectile>(WeaponProjectile, GetActorLocation(), RotationTowardsHit, Parameters);
 				P->WeaponBase = this;
 				//UE_LOG(LogTemp, Warning, TEXT("SHOOTING SHOOTING ROT: %s"), *HitPoint.ToString());
+
+				CurrentClipAmmo--;
+				OnRep_AmmoInOneMag();
+				UE_LOG(LogTemp, Warning, TEXT("Current Clip Ammo: %f"), CurrentClipAmmo);
+			}
+		}else
+		{
+			EndShooting();
 		}
 	}else
 	{

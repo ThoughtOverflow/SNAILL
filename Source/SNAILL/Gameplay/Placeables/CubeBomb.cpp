@@ -97,7 +97,7 @@ void ACubeBomb::Tick(float DeltaTime)
 				{
 					Character->bEnableGravPull = true;
 				}
-				Character->UpdateGravPush(PullForce, 0.55f);
+				Character->UpdateGravPush(PullForce, 0.92f);
 				
 				
 			}

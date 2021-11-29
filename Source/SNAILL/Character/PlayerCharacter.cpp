@@ -356,10 +356,36 @@ void APlayerCharacter::BeginShooting()
 			
 		if(CurrentWeapon)
 		{
-			CurrentWeapon->Shoot();
+			CurrentWeapon->BeginShooting();
 		}
 	}
 
+}
+
+void APlayerCharacter::EndShooting()
+{
+	if(!HasAuthority())
+	{
+		Server_EndShooting();
+	}else
+	{
+			
+		if(CurrentWeapon)
+		{
+			CurrentWeapon->EndShooting();
+		}
+	}
+}
+
+void APlayerCharacter::Reload()
+{
+	if(!HasAuthority())
+	{
+		Server_Reload();
+	}
+
+	///TODO: RELOAD LOGIC;
+	
 }
 
 void APlayerCharacter::BeginShootingSpecial()
@@ -538,6 +564,11 @@ void APlayerCharacter::Server_BeginShooting_Implementation()
 	BeginShooting();
 }
 
+void APlayerCharacter::Server_EndShooting_Implementation()
+{
+	EndShooting();
+}
+
 
 void APlayerCharacter::Server_BeginShootingSpecial_Implementation()
 {
@@ -558,6 +589,11 @@ void APlayerCharacter::Server_DoRotationVertical_Implementation(float val)
 void APlayerCharacter::Server_EnableShield_Implementation()
 {
 	EnableShield();
+}
+
+void APlayerCharacter::Server_Reload_Implementation()
+{
+	Reload();
 }
 
 void APlayerCharacter::SelectDefWeaponTMP()
@@ -641,11 +677,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Spray", IE_Released, this, &APlayerCharacter::TrySpray);
 	PlayerInputComponent->BindAction("TMP", IE_Released, this, &APlayerCharacter::Server_TMP);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::BeginShooting);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::EndShooting);
 	PlayerInputComponent->BindAction("Fire_Special", IE_Pressed, this, &APlayerCharacter::BeginShootingSpecial);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::BeginSprinting);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::EndSprinting);
 	PlayerInputComponent->BindAction("ActivateShield", IE_Pressed, this, &APlayerCharacter::EnableShield);
 	PlayerInputComponent->BindAction("ToggleBomb", IE_Pressed, this, &APlayerCharacter::PlaceBomb);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &APlayerCharacter::Reload);
 
 }
 

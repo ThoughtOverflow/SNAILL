@@ -16,9 +16,13 @@ public:
 	AWeaponBase();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties", ReplicatedUsing = OnRep_AmmoCount)
-		float AmmoCount;
+		float TotalAmmo;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties", ReplicatedUsing = OnRep_AmmoInOneMag)
-		float AmmoInOneMag;
+		float CurrentClipAmmo;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties", Replicated)
+		float TotalAmmoCapacity;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties", Replicated)
+		float ClipCapacity;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties")
 		FText WeaponName;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties")
@@ -28,7 +32,12 @@ public:
 				
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UStaticMeshComponent* WeaponMeshComponent;
-	
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
+		FTimerHandle ShootingTimer;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = "Weapon Properties")
+		int32 fireRate;
 
 protected:
 	// Called when the game starts or when spawned
@@ -43,14 +52,22 @@ protected:
 
 	UFUNCTION(NetMulticast, Unreliable)
 		void Multicast_SpawnMuzzleParticle();
+	UFUNCTION()
+		virtual void Shoot();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+		float fireTime;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+		bool BeginShooting();
 
 	UFUNCTION(BlueprintCallable)
-		virtual void Shoot();
+		void EndShooting();
+	
 	UFUNCTION(BlueprintCallable)
 		virtual void ShootSpecial();
 	UFUNCTION(BlueprintImplementableEvent)

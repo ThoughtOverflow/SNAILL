@@ -105,6 +105,17 @@ void ASNAILLPlayerController::Client_DoRotationVertical_Implementation(float val
 	AddYawInput(val);
 }
 
+
+void ASNAILLPlayerController::Client_RefreshPlayerAmmoCount_Implementation(float clipAmmo, float totalAmmo)
+{
+	if(PlayerBasicUIWidget)
+	{
+		PlayerBasicUIWidget->clipAmmo = clipAmmo;
+		PlayerBasicUIWidget->totalAmmo = totalAmmo;
+		PlayerBasicUIWidget->RefreshWidget();
+	}
+}
+
 void ASNAILLPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

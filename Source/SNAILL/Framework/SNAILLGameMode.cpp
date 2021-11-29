@@ -12,9 +12,9 @@ ASNAILLGameMode::ASNAILLGameMode()
 
 void ASNAILLGameMode::Logout(AController* Exiting)
 {
+		Super::Logout(Exiting);
 	if(ASNAILLPlayerController* C = Cast<ASNAILLPlayerController>(Exiting))
 	{
-		Super::Logout(Exiting);
 		UE_LOG(LogTemp, Warning, TEXT("EXIT"));
 		switch (GetGameState<ASNAILLGameState>()->GetPlayerTeam(C))
 		{

@@ -60,6 +60,8 @@ class SNAILL_API ASNAILLPlayerController : public APlayerController
 		void DoRotationVertical(float val);
 	UFUNCTION(Client, Reliable)
 		void Client_DoRotationVertical(float val);
+	UFUNCTION(Client, Reliable)
+		void Client_RefreshPlayerAmmoCount(float clipAmmo, float totalAmmo);
 
 protected:
 

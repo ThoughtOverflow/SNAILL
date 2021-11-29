@@ -147,6 +147,10 @@ protected:
 	UFUNCTION()
 		void BeginShooting();
 	UFUNCTION()
+		void EndShooting();
+	UFUNCTION()
+		void Reload();
+	UFUNCTION()
 		void BeginShootingSpecial();
 	UFUNCTION(Server, Reliable)
 		void Server_BeginSprinting();
@@ -206,9 +210,13 @@ public:
 	UFUNCTION(Server, Reliable)
 		void Server_BeginShooting();
 	UFUNCTION(Server, Reliable)
+		void Server_EndShooting();
+	UFUNCTION(Server, Reliable)
 		void Server_BeginShootingSpecial();
 	UFUNCTION(Server, Reliable)
 		void Server_EnableShield();
+	UFUNCTION(Server, Reliable)
+		void Server_Reload();
 			
 	UFUNCTION(Server, Reliable)
 		void Server_DoRotationVertical(float val);
