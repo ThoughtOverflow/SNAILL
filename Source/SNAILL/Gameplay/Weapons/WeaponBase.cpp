@@ -23,7 +23,7 @@ AWeaponBase::AWeaponBase()
 
 	TotalAmmoCapacity = 500;
 	ClipCapacity = 30;
-	fireRate = 460;
+	fireRate = 450;
 	fireTime = -1;
 
 }
@@ -36,6 +36,7 @@ void AWeaponBase::BeginPlay()
 	{
 		CurrentClipAmmo = ClipCapacity;
 		TotalAmmo = TotalAmmoCapacity-ClipCapacity;
+		OnRep_AmmoCount();
 		OnRep_AmmoInOneMag();
 		UE_LOG(LogTemp, Warning, TEXT("Set Default ammo variables for weapon"));
 	}
@@ -55,19 +56,23 @@ void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AWeaponBase::OnRep_AmmoCount()
 {
-	UE_LOG(LogTemp, Warning, TEXT("I AM: %s"), *GetOwner()->GetName());
 	if(APlayerCharacter* OwningCharacter = Cast<APlayerCharacter>(GetOwner()))
 	{
-		OwningCharacter->TryGetPlayerController()->Client_RefreshPlayerAmmoCount(CurrentClipAmmo, TotalAmmo);
+		if(ASNAILLPlayerController* C = OwningCharacter->TryGetPlayerController())
+		{
+			C->Client_RefreshPlayerAmmoCount(CurrentClipAmmo, TotalAmmo);
+		}
 	}
 }
 
 void AWeaponBase::OnRep_AmmoInOneMag()
 {
-	UE_LOG(LogTemp, Warning, TEXT("I AM: %s"), *GetOwner()->GetName());
 	if(APlayerCharacter* OwningCharacter = Cast<APlayerCharacter>(GetOwner()))
 	{
-		OwningCharacter->TryGetPlayerController()->Client_RefreshPlayerAmmoCount(CurrentClipAmmo, TotalAmmo);
+		if(ASNAILLPlayerController* C = OwningCharacter->TryGetPlayerController())
+		{
+			C->Client_RefreshPlayerAmmoCount(CurrentClipAmmo, TotalAmmo);
+		}
 	}
 }
 
@@ -93,8 +98,7 @@ bool AWeaponBase::BeginShooting()
 			UE_LOG(LogTemp, Warning, TEXT("Fire Time: %f"), fireTime);
 			if(fireTime != -1)
 			{
-				Shoot();
-				GetWorldTimerManager().SetTimer(ShootingTimer, this, &AWeaponBase::Shoot, fireTime, true);	
+				GetWorldTimerManager().SetTimer(ShootingTimer, this, &AWeaponBase::Shoot, fireTime, true, 0.f);
 			}
 			return true;
 		}

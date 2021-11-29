@@ -110,6 +110,7 @@ void ASNAILLPlayerController::Client_RefreshPlayerAmmoCount_Implementation(float
 {
 	if(PlayerBasicUIWidget)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("FOUND!"));
 		PlayerBasicUIWidget->clipAmmo = clipAmmo;
 		PlayerBasicUIWidget->totalAmmo = totalAmmo;
 		PlayerBasicUIWidget->RefreshWidget();

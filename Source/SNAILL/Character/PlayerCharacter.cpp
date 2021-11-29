@@ -701,6 +701,7 @@ void APlayerCharacter::SelectWeapon(TSubclassOf<AWeaponBase> WeaponToSelect)
 				CurrentWeapon = GetWorld()->SpawnActor<AWeaponBase>(WeaponToSelect, GetMesh()->GetSocketLocation("hand_l"), GetMesh()->GetSocketRotation("hand_l"));
 				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepWorldTransform, FName("hand_l"));
 				CurrentWeapon->SetOwner(this);
+				CurrentWeapon->OnRep_AmmoInOneMag(); // Added for server ammo update at the beginning...
 				FVector Loc;
 				FRotator Rot;
 				Rot = GetController()->GetControlRotation();
@@ -811,6 +812,9 @@ void APlayerCharacter::DisplayBasicUI_Implementation()
 			PlayerController->PlayerBasicUIWidget->ShieldChargeLevel = ShieldBatteryLevel;
 			PlayerController->PlayerBasicUIWidget->ShieldMaxLevel = ShieldMaxLevel;
 			PlayerController->PlayerBasicUIWidget->bIsShieldBarRed = bIsShieldBarRed;
+			PlayerController->PlayerBasicUIWidget->clipAmmo = 0;
+			PlayerController->PlayerBasicUIWidget->totalAmmo = 0;
+			PlayerController->PlayerBasicUIWidget->RefreshWidget();
 		}
 	}
 }

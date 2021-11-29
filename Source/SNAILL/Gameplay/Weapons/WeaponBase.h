@@ -39,16 +39,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = "Weapon Properties")
 		int32 fireRate;
 
+	UFUNCTION()
+		void OnRep_AmmoCount();
+	UFUNCTION()
+		void OnRep_AmmoInOneMag();
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	UFUNCTION()
-		void OnRep_AmmoCount();
-	UFUNCTION()
-		void OnRep_AmmoInOneMag();
 
 	UFUNCTION(NetMulticast, Unreliable)
 		void Multicast_SpawnMuzzleParticle();

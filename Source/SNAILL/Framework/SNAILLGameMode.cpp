@@ -57,8 +57,8 @@ void ASNAILLGameMode::JoinTeam(EGameTeams Team, ASNAILLPlayerController* Player)
 				APlayerCharacter* SpawnedPlayer = GetWorld()->SpawnActor<APlayerCharacter>(TeamACharacter, SelectedStart->GetActorLocation(), SelectedStart->GetActorRotation());
 				SpawnedPlayer->bIsPlayerDead = false;
 				Player->Possess(SpawnedPlayer);
-				SpawnedPlayer->SelectDefWeaponTMP();
 				SpawnedPlayer->DisplayBasicUI();
+				SpawnedPlayer->SelectDefWeaponTMP();
 			}
 		}
 		
@@ -76,8 +76,8 @@ void ASNAILLGameMode::JoinTeam(EGameTeams Team, ASNAILLPlayerController* Player)
 				Player->ClientSetRotation(SelectedStart->GetActorRotation());
 				APlayerCharacter* SpawnedPlayer = GetWorld()->SpawnActor<APlayerCharacter>(TeamBCharacter, SelectedStart->GetActorLocation(), SelectedStart->GetActorRotation());
 				Player->Possess(SpawnedPlayer);
-				SpawnedPlayer->SelectDefWeaponTMP();
 				SpawnedPlayer->DisplayBasicUI();
+				SpawnedPlayer->SelectDefWeaponTMP();
 			}
 		}
 	}
@@ -245,8 +245,8 @@ void ASNAILLGameMode::Respawn(ASNAILLPlayerController* PlayerToRespawn)
 		APlayerCharacter* SpawnedPlayer = GetWorld()->SpawnActor<APlayerCharacter>(TeamCharacter, SelectedStart->GetActorLocation(), SelectedStart->GetActorRotation());
 		SpawnedPlayer->bIsPlayerDead = false;
 		PlayerToRespawn->Possess(SpawnedPlayer);
-		SpawnedPlayer->SelectDefWeaponTMP();
 		SpawnedPlayer->DisplayBasicUI();
+		SpawnedPlayer->SelectDefWeaponTMP();
 	}
 }
 
