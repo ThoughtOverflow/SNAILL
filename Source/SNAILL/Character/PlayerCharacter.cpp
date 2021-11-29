@@ -384,7 +384,11 @@ void APlayerCharacter::Reload()
 		Server_Reload();
 	}
 
-	///TODO: RELOAD LOGIC;
+	if(CurrentWeapon)
+	{
+		bool reloadSuccess = CurrentWeapon->TryReload();
+		UE_LOG(LogCore, Warning, TEXT("%s"), reloadSuccess ? TEXT("Reload Successful!") : TEXT("Reload Invalid!"))
+	}
 	
 }
 

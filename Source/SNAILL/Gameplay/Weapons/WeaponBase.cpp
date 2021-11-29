@@ -26,6 +26,10 @@ AWeaponBase::AWeaponBase()
 	fireRate = 450;
 	fireTime = -1;
 
+	bCanWeaponShoot = true;
+	reloadTime = 2.f;
+	ammoDiff = 0.f;
+
 }
 
 // Called when the game starts or when spawned
@@ -52,6 +56,12 @@ void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AWeaponBase, fireRate);
 	DOREPLIFETIME(AWeaponBase, fireTime);
 	DOREPLIFETIME(AWeaponBase, ShootingTimer);
+	DOREPLIFETIME(AWeaponBase, TotalAmmoCapacity);
+	DOREPLIFETIME(AWeaponBase, ClipCapacity);
+	DOREPLIFETIME(AWeaponBase, bCanWeaponShoot);
+	DOREPLIFETIME(AWeaponBase, reloadTime);
+	DOREPLIFETIME(AWeaponBase, ReloadTimer);
+	DOREPLIFETIME(AWeaponBase, ammoDiff);
 }
 
 void AWeaponBase::OnRep_AmmoCount()
@@ -80,6 +90,7 @@ void AWeaponBase::Multicast_SpawnMuzzleParticle_Implementation()
 {
 	SpawnMuzzleParticle();
 }
+
 
 // Called every frame
 void AWeaponBase::Tick(float DeltaTime)
@@ -118,7 +129,7 @@ void AWeaponBase::Shoot()
 {
 	if(HasAuthority() && GetOwner()->HasAuthority())
 	{
-		if(CurrentClipAmmo >= 1)
+		if(CurrentClipAmmo >= 1 && bCanWeaponShoot)
 		{
 			//SpawnMuzzleParticle();
 			Multicast_SpawnMuzzleParticle();
@@ -187,5 +198,37 @@ void AWeaponBase::ShootSpecial()
 	{
 		UE_LOG(LogTemp, Error, TEXT("NOAUTH"));
 	}
+}
+
+bool AWeaponBase::TryReload()
+{
+	if(HasAuthority() && GetOwner()->HasAuthority())
+	{
+		if(CurrentClipAmmo != ClipCapacity)
+		{
+			ammoDiff = ClipCapacity - CurrentClipAmmo;
+			if(TotalAmmo > 0)
+			{
+				GetWorldTimerManager().SetTimer(ReloadTimer, this, &AWeaponBase::ReloadTimerHit, reloadTime, false);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void AWeaponBase::ReloadTimerHit()
+{
+	if(TotalAmmo > ammoDiff)
+	{
+		CurrentClipAmmo = ClipCapacity;
+		TotalAmmo -= ammoDiff;
+	}else
+	{
+		CurrentClipAmmo += TotalAmmo;
+		TotalAmmo = 0;
+	}
+	OnRep_AmmoCount();
+	OnRep_AmmoInOneMag();
 }
 

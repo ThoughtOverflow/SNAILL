@@ -36,8 +36,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 		FTimerHandle ShootingTimer;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
+		FTimerHandle ReloadTimer;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = "Weapon Properties")
 		int32 fireRate;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = "Weapon Properties")
+		float reloadTime;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
+		bool bCanWeaponShoot;
 
 	UFUNCTION()
 		void OnRep_AmmoCount();
@@ -58,6 +64,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 		float fireTime;
 
+	UPROPERTY(BlueprintReadOnly, Replicated)
+		float ammoDiff;
+
+	UFUNCTION()
+		void ReloadTimerHit();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -72,5 +84,8 @@ public:
 		virtual void ShootSpecial();
 	UFUNCTION(BlueprintImplementableEvent)
 		void SpawnMuzzleParticle();
+
+	UFUNCTION(BlueprintCallable)
+		bool TryReload();
 	
 };
