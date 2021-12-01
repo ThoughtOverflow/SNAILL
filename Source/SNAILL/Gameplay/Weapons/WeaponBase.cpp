@@ -243,6 +243,7 @@ bool AWeaponBase::TryReload()
 				bPreReloadFireState = bCanWeaponShoot;
 				bCanWeaponShoot = false;
 				GetWorldTimerManager().SetTimer(ReloadTimer, this, &AWeaponBase::ReloadTimerHit, reloadTime, false);
+				Cast<APlayerCharacter>(GetOwner())->bIsReloading = true;
 				return true;
 			}
 		}
@@ -264,5 +265,10 @@ void AWeaponBase::ReloadTimerHit()
 	bCanWeaponShoot = bPreReloadFireState;
 	OnRep_AmmoCount();
 	OnRep_AmmoInOneMag();
+	if(APlayerCharacter* OwningPlayer = Cast<APlayerCharacter>(GetOwner()))
+	{
+		OwningPlayer->bIsReloading = false;
+	}
+	
 }
 

@@ -105,6 +105,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapons")
 		TSubclassOf<ACubeBomb> CubeBomb;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated)
+		bool bIsReloading;
+
 	
 	
 protected:

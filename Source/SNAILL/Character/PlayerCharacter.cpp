@@ -50,6 +50,8 @@ APlayerCharacter::APlayerCharacter()
 	bIsSnailCollectorAvailable = false;
 	bEnableGravPull = false;
 	
+	bIsReloading = false;
+	
 	//----------------COMPONENT INITIALIZATION------------
 
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
@@ -109,6 +111,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, bEnableGravPull);
 	DOREPLIFETIME(APlayerCharacter, bIsSnailCollectorAvailable);
 	DOREPLIFETIME(APlayerCharacter, SnailCollectorKillRegistry);
+	DOREPLIFETIME(APlayerCharacter, bIsReloading);
 	
 }
 
@@ -271,6 +274,7 @@ void APlayerCharacter::CheckInteractable()
 	QueryParams.AddIgnoredActor(this);
 	
 	UWorld* World = GetWorld();
+	
 	if (World->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, QueryParams))
 	{
 
@@ -326,7 +330,7 @@ void APlayerCharacter::BeginInteract()
 	{
 		Server_BeginInteract();
 	}
-	if(InteractionData.LastViewedInteractionComponent!=nullptr)
+	if(InteractionData.LastViewedInteractionComponent!=nullptr && !bIsReloading)
 	{
 		InteractionData.LastViewedInteractionComponent->BeginInteract(this);
 	}
