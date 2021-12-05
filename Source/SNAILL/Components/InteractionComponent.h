@@ -26,15 +26,15 @@ class SNAILL_API UInteractionComponent : public UWidgetComponent
 	UInteractionComponent();
 
 	UFUNCTION()
-		void BeginFocus(APawn* Interactor);
+		virtual void BeginFocus(APawn* Interactor);
 	UFUNCTION()
-		void EndFocus(APawn* Interactor);
+		virtual void EndFocus(APawn* Interactor);
 	UFUNCTION()
-		void BeginInteract(APawn* Interactor);
+		virtual void BeginInteract(APawn* Interactor);
 	UFUNCTION()
-		void EndInteract(APawn* Interactor);
+		virtual void EndInteract(APawn* Interactor);
 	UFUNCTION()
-		void Interact(APawn* Interactor);
+		virtual void Interact(APawn* Interactor);
 
 
 	protected:

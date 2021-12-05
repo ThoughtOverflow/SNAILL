@@ -324,6 +324,19 @@ void APlayerCharacter::NoNewInteractableFound()
 	}
 }
 
+void APlayerCharacter::EndInteractFocus()
+{
+	if(InteractionData.LastViewedInteractionComponent!=nullptr)
+	{
+		if(IsLocallyControlled())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LÓGING"))
+			InteractionData.LastViewedInteractionComponent->EndFocus(this);
+		}
+	}
+}
+
+
 void APlayerCharacter::BeginInteract()
 {
 	if(!HasAuthority())

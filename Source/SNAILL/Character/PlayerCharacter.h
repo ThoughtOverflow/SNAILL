@@ -140,10 +140,6 @@ protected:
 	UFUNCTION()
 		void CheckInteractable();
 	UFUNCTION()
-		void FoundNewInteractable(UInteractionComponent* FoundComponent);
-	UFUNCTION()
-		void NoNewInteractableFound();
-	UFUNCTION()
 		void BeginInteract();
 	UFUNCTION()
 		void EndInteract();
@@ -201,6 +197,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	ASNAILLPlayerController* TryGetPlayerController();
+
+
+	UFUNCTION()
+	void FoundNewInteractable(UInteractionComponent* FoundComponent);
+	UFUNCTION()
+		void NoNewInteractableFound();
+
+	UFUNCTION(BlueprintCallable)
+		void EndInteractFocus();
+
 	
 	UFUNCTION(Server, Reliable)
 		void Server_BeginInteract();
