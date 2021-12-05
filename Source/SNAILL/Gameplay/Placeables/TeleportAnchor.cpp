@@ -22,6 +22,7 @@ ATeleportAnchor::ATeleportAnchor()
 	InteractionComponent->SetupAttachment(GetRootComponent());
 	
 	InteractionComponent->OnInteract.AddDynamic(this, &ATeleportAnchor::PickupAnchor);
+
 	
 }
 
@@ -32,12 +33,14 @@ void ATeleportAnchor::BeginPlay()
 	
 }
 
+
+
 void ATeleportAnchor::PickupAnchor(APawn* Interactor)
 {
 
 	if(OwningPlayer && Cast<APlayerCharacter>(Interactor) == OwningPlayer)
 	{
-		OwningPlayer->bAnchorAvailable = true;
+		OwningPlayer->AnchorPickedUp();
 		this->Destroy();
 	}
 	

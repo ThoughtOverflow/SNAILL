@@ -21,19 +21,17 @@ public:
 
 	UPlayerSpecInteractionComponent();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated)
 	TArray<APlayerCharacter*> AllowedInteractors;
 
 
 protected:
 
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	
 public:
 
 	virtual void BeginFocus(APawn* Interactor) override;
-
-	UFUNCTION()
-		void OnRep_AllowedInteractors();
 	
 };

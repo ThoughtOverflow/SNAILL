@@ -268,7 +268,7 @@ void APlayerCharacter::CheckInteractable()
 	
 	GetController()->GetPlayerViewPoint(StartLocation, StartRotation);
 	
-	FVector EndLocation = StartLocation + StartRotation.Vector() * 1000.f;
+	FVector EndLocation = StartLocation + StartRotation.Vector() * 10000.f;
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);

@@ -22,11 +22,22 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Teleport Properties")
 		TSubclassOf<ATeleportAnchor> TeleportAnchorClass;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Teleport Properties", ReplicatedUsing = OnRep_SpawnedAnchor)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Teleport Properties", Replicated)
 		ATeleportAnchor* SpawnedAnchor;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Teleport Properties", Replicated)
 		bool bAnchorAvailable;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Teleport Properties", Replicated)
+	float TeleportTimerCooldown;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Teleport Properties", Replicated)
+	float TeleportPlacementCooldown;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Teleport Properties", Replicated)
+	bool bCanTeleport;
+
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	FTimerHandle TeleportTimerHandle;
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	FTimerHandle TeleportPlacementHandle;
 
 protected:
 
@@ -54,6 +65,14 @@ public:
 		void UseSpecialAbility();
 
 	UFUNCTION()
-		void OnRep_SpawnedAnchor();
+		void TeleportTimerHit();
+	UFUNCTION()
+		void TeleportPlacementTimerHit();
+	UFUNCTION(Server, Reliable)
+		void AnchorPickedUp();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void TeleportFX();
+		
 	
 };

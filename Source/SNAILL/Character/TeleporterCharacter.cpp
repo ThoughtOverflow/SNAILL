@@ -7,6 +7,9 @@
 ATeleporterCharacter::ATeleporterCharacter()
 {
 	bAnchorAvailable = true;
+	bCanTeleport = true;
+    TeleportPlacementCooldown = 10.f;
+    TeleportTimerCooldown = 5.f;
 }
 
 void ATeleporterCharacter::BeginPlay()
@@ -28,6 +31,11 @@ void ATeleporterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(ATeleporterCharacter, bAnchorAvailable);
 	DOREPLIFETIME(ATeleporterCharacter, SpawnedAnchor);
+	DOREPLIFETIME(ATeleporterCharacter, bCanTeleport);
+	DOREPLIFETIME(ATeleporterCharacter, TeleportPlacementCooldown);
+	DOREPLIFETIME(ATeleporterCharacter, TeleportTimerCooldown);
+	DOREPLIFETIME(ATeleporterCharacter, TeleportPlacementHandle);
+	DOREPLIFETIME(ATeleporterCharacter, TeleportTimerHandle);
 	
 }
 
@@ -84,7 +92,10 @@ bool ATeleporterCharacter::TeleportToAnchor()
 		Server_TeleportToAnchor();
 	}else
 	{
+		TeleportFX();
 		SetActorLocation(SpawnedAnchor->GetActorLocation());
+		GetWorldTimerManager().SetTimer(TeleportTimerHandle, this, &ATeleporterCharacter::TeleportTimerHit, TeleportTimerCooldown, false);
+		bCanTeleport = false;
 		return true;
 	}
 	
@@ -110,13 +121,28 @@ void ATeleporterCharacter::UseSpecialAbility()
 	if(bAnchorAvailable)
 	{
 		TryPlaceAnchor();
-	}else
+		
+	}else if(!bAnchorAvailable && bCanTeleport)
 	{
 		TeleportToAnchor();
 	}
 }
 
-void ATeleporterCharacter::OnRep_SpawnedAnchor()
+void ATeleporterCharacter::TeleportTimerHit()
 {
-	SpawnedAnchor->InteractionComponent->AllowedInteractors.Add(this);
+	bCanTeleport = true;
+}
+
+void ATeleporterCharacter::TeleportPlacementTimerHit()
+{
+	bCanTeleport = true;
+	bAnchorAvailable = true;
+}
+
+void ATeleporterCharacter::AnchorPickedUp_Implementation()
+{
+	GetWorldTimerManager().SetTimer(TeleportPlacementHandle, this, &ATeleporterCharacter::TeleportPlacementTimerHit, TeleportPlacementCooldown, false);
+	bAnchorAvailable = false;
+	bCanTeleport = false;
+	GetWorldTimerManager().ClearTimer(TeleportTimerHandle);
 }
