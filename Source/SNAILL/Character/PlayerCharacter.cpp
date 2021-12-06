@@ -532,7 +532,6 @@ void APlayerCharacter::PlaceBomb()
 
 void APlayerCharacter::Client_DisplaySnailCollectorAvailability_Implementation()
 {
-	//TODO: Show that snail collector is available;
 	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
 	{
 		if(PlayerController->PlayerBasicUIWidget) {
@@ -812,6 +811,18 @@ void APlayerCharacter::ShieldTimerHit()
 		}	
 	}
 }
+
+void APlayerCharacter::Client_DisplayAlertMessage_Implementation(const FText& AlertMessage)
+{
+	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
+	{
+		if(PlayerController->PlayerBasicUIWidget) {
+			PlayerController->PlayerBasicUIWidget->DisplayAlertMessage(AlertMessage);
+			PlayerController->PlayerBasicUIWidget->RefreshWidget();
+		}
+	}
+}
+
 
 void APlayerCharacter::UpdateGravPush_Implementation(FVector MovementVector, float val)
 {

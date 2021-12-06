@@ -133,6 +133,7 @@ void ATeleporterCharacter::TeleportTimerHit()
 {
 	bCanTeleport = true;
 	OnRep_CanTeleport();
+	Client_DisplayAlertMessage(FText::FromString("Teleport Ready"));
 }
 
 void ATeleporterCharacter::TeleportPlacementTimerHit()
@@ -140,6 +141,7 @@ void ATeleporterCharacter::TeleportPlacementTimerHit()
 	bCanTeleport = true;
 	OnRep_CanTeleport();
 	bAnchorAvailable = true;
+	Client_DisplayAlertMessage(FText::FromString("Teleport Anchor Available"));
 }
 
 void ATeleporterCharacter::OnRep_CanTeleport()

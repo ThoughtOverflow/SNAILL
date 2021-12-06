@@ -45,5 +45,7 @@ class SNAILL_API UPlayerDefaultHUD : public UUserWidget
 		void ToggleReloadAlert(bool bOn);
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 		void DisplayBombAvailability();
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+		void DisplayAlertMessage(const FText& AlertMessage);
 	
 };

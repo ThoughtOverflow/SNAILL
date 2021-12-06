@@ -281,6 +281,8 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_DisplaySnailCollectorAvailability();
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void Client_DisplayAlertMessage(const FText& AlertMessage);
 	
 
 };

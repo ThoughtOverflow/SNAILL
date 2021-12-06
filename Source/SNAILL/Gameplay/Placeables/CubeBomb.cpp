@@ -240,6 +240,7 @@ void ACubeBomb::OnTrigger(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 				StartCountdown();
 				bISTriggered = true;
 				OnRep_Triggered();
+				Cast<APlayerCharacter>(BombDeployer->GetPawn())->Client_DisplayAlertMessage(FText::FromString("Snail Collector Triggered"));
 			}
 			
 		}
@@ -303,6 +304,7 @@ void ACubeBomb::CheckForInstantTrigger()
 					StartCountdown();
 					bISTriggered = true;
 					OnRep_Triggered();
+					Cast<APlayerCharacter>(BombDeployer->GetPawn())->Client_DisplayAlertMessage(FText::FromString("Snail Collector Triggered"));
 				}
 			}
 		}
