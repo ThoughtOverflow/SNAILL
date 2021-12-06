@@ -31,7 +31,7 @@ public:
 	float TeleportTimerCooldown;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Teleport Properties", Replicated)
 	float TeleportPlacementCooldown;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Teleport Properties", Replicated)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Teleport Properties", ReplicatedUsing = OnRep_CanTeleport)
 	bool bCanTeleport;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
@@ -73,6 +73,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void TeleportFX();
+
+	UFUNCTION()
+		void OnRep_CanTeleport();
 		
 	
 };

@@ -96,6 +96,7 @@ bool ATeleporterCharacter::TeleportToAnchor()
 		SetActorLocation(SpawnedAnchor->GetActorLocation());
 		GetWorldTimerManager().SetTimer(TeleportTimerHandle, this, &ATeleporterCharacter::TeleportTimerHit, TeleportTimerCooldown, false);
 		bCanTeleport = false;
+		OnRep_CanTeleport();
 		return true;
 	}
 	
@@ -131,12 +132,21 @@ void ATeleporterCharacter::UseSpecialAbility()
 void ATeleporterCharacter::TeleportTimerHit()
 {
 	bCanTeleport = true;
+	OnRep_CanTeleport();
 }
 
 void ATeleporterCharacter::TeleportPlacementTimerHit()
 {
 	bCanTeleport = true;
+	OnRep_CanTeleport();
 	bAnchorAvailable = true;
+}
+
+void ATeleporterCharacter::OnRep_CanTeleport()
+{
+    if(SpawnedAnchor) {
+	SpawnedAnchor->ToggleTeleporterAvailabilty(bCanTeleport);
+	}
 }
 
 void ATeleporterCharacter::AnchorPickedUp_Implementation()
@@ -144,5 +154,6 @@ void ATeleporterCharacter::AnchorPickedUp_Implementation()
 	GetWorldTimerManager().SetTimer(TeleportPlacementHandle, this, &ATeleporterCharacter::TeleportPlacementTimerHit, TeleportPlacementCooldown, false);
 	bAnchorAvailable = false;
 	bCanTeleport = false;
+	OnRep_CanTeleport();
 	GetWorldTimerManager().ClearTimer(TeleportTimerHandle);
 }

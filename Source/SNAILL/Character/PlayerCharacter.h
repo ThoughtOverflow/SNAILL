@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
+#include "SNAILL/Components/PlayerNameTag.h"
 #include "SNAILL/Enums/ESuperchargeState.h"
 #include "SNAILL/Framework/SNAILLPlayerController.h"
 #include "SNAILL/Gameplay/Placeables/CubeBomb.h"
@@ -44,6 +45,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UCameraComponent* PlayerCamera;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPlayerNameTag* PlayerNameTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int32 PlayerMaxJumpBoostCount;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)

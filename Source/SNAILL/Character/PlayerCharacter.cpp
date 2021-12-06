@@ -55,6 +55,8 @@ APlayerCharacter::APlayerCharacter()
 	//----------------COMPONENT INITIALIZATION------------
 
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
+	//PlayerNameTag = CreateDefaultSubobject<UPlayerNameTag>(TEXT("PlayerNametag"));
+	// PlayerNameTag->SetupAttachment(GetMesh());
 	PlayerCamera->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "head");
 	//PlayerCamera->SetupAttachment(GetCapsuleComponent());
 	PlayerCamera->SetRelativeRotation(FRotator(0.0f,90.f,-90.f));
