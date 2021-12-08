@@ -101,7 +101,11 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 				KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->ForceNetUpdate();
 				UE_LOG(LogTemp, Warning, TEXT("SET PLAYER STATE VAR TO: %s"), *KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->KillerName);
 
-				TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
+				// TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
+				if(Cast<IDamageHandler>(TargetPlayer))
+				{
+					Cast<IDamageHandler>(TargetPlayer)->ChangeObjectHealth(DamageToDeal * -1);
+				}
 				
 				//Double Check Kill Boolean:
 				if(KilledPlayer->bIsPlayerDead)
@@ -157,7 +161,11 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 					KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->ForceNetUpdate();
 					UE_LOG(LogTemp, Warning, TEXT("SET PLAYER STATE VAR TO: %s"), *KilledPlayer->GetPlayerState<ASNAILLPlayerState>()->KillerName);
 
-					TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
+					// TargetPlayer->ChangePlayerHealth(DamageToDeal * -1);
+					if(Cast<IDamageHandler>(TargetPlayer))
+					{
+						Cast<IDamageHandler>(TargetPlayer)->ChangeObjectHealth(DamageToDeal * -1);
+					}
 					
 					//Double Check Kill Boolean:
 					if(KilledPlayer->bIsPlayerDead)

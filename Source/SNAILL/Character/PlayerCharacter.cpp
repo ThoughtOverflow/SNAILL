@@ -812,6 +812,7 @@ void APlayerCharacter::ShieldTimerHit()
 	}
 }
 
+
 void APlayerCharacter::Client_DisplayAlertMessage_Implementation(const FText& AlertMessage)
 {
 	if(ASNAILLPlayerController* PlayerController = TryGetPlayerController())
@@ -867,4 +868,16 @@ void APlayerCharacter::Server_TMP_Implementation()
 	
 	
 }
+
+
+void APlayerCharacter::SetObjectHealth(float newHealth)
+{
+	SetPlayerHealth(newHealth);
+}
+
+void APlayerCharacter::ChangeObjectHealth(float deltaHealth)
+{
+	ChangePlayerHealth(deltaHealth);
+}
+
 

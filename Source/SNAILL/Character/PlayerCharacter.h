@@ -10,6 +10,7 @@
 #include "SNAILL/Framework/SNAILLPlayerController.h"
 #include "SNAILL/Gameplay/Placeables/CubeBomb.h"
 #include "SNAILL/Gameplay/Weapons/WeaponBase.h"
+#include "SNAILL/Interfaces/DamageHandler.h"
 
 #include "PlayerCharacter.generated.h"
 
@@ -32,7 +33,7 @@ public:
 };
 
 UCLASS()
-class SNAILL_API APlayerCharacter : public ACharacter
+class SNAILL_API APlayerCharacter : public ACharacter, public IDamageHandler
 {
 	GENERATED_BODY()
 
@@ -283,6 +284,11 @@ public:
 	void Client_DisplaySnailCollectorAvailability();
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void Client_DisplayAlertMessage(const FText& AlertMessage);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetObjectHealth(float newHealth) override;
+	UFUNCTION(BlueprintCallable)
+	virtual void ChangeObjectHealth(float deltaHealth) override;
 	
 
 };
