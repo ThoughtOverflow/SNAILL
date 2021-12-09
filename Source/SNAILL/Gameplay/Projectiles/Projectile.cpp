@@ -66,7 +66,17 @@ void AProjectile::OnBlock(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Block Destroy"));
-	this->Destroy();
+	if(HasAuthority())
+	{
+		if(WeaponBase && OtherActor != GetInstigator())
+		{
+			//OtherActor->Destroy();
+			//Destroy();
+			UE_LOG(LogTemp, Warning, TEXT("Calling Damage Handler"));
+			Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), OtherActor, projectileDamage, bCanDamageAllies);
+			this->Destroy();
+		}
+	}
 }
 
 // Called every frame

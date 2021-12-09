@@ -209,6 +209,15 @@ void ASNAILLGameMode::ProjectileHit(AActor* Shooter, AActor* Target, int32 Damag
 				}
 			}
 			
+		}else
+		{
+			//Try to apply damage to hit object if implements IDamageHandler;
+
+			if(Cast<IDamageHandler>(Target))
+			{
+				Cast<IDamageHandler>(Target)->ChangeObjectHealth(DamageToDeal * -1.0f);
+			}
+			
 		}
 	}
 }

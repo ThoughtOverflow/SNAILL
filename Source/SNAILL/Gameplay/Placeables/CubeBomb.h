@@ -8,6 +8,7 @@
 
 #include "GameFramework/Actor.h"
 #include "SNAILL/Framework/SNAILLPlayerController.h"
+#include "SNAILL/Interfaces/DamageHandler.h"
 
 #include "CubeBomb.generated.h"
 
@@ -15,7 +16,7 @@ class APlayerCharacter;
 class UInteractionComponent;
 
 UCLASS()
-class SNAILL_API ACubeBomb : public AActor
+class SNAILL_API ACubeBomb : public AActor, public IDamageHandler
 {
 	GENERATED_BODY()
 	
@@ -53,6 +54,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties", Replicated)
 		TArray<APlayerCharacter*> PullablePlayers;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties", Replicated)
+		float CubeHealth;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Properties", Replicated)
+		float CubeMaxHealth;
 
 protected:
 	// Called when the game starts or when spawned
@@ -95,5 +101,11 @@ public:
 
 	UFUNCTION()
 		void ToggleGravPullForEachPlayer(bool bEnable);
+
+	UFUNCTION(BlueprintCallable)
+		void DestroyCube();
+
+	virtual void SetObjectHealth(float newHealth) override;
+	virtual void ChangeObjectHealth(float deltaHealth) override;
 	
 };

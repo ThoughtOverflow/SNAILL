@@ -48,6 +48,9 @@ ACubeBomb::ACubeBomb()
 	
 	EnemyTeam = EGameTeams::EGT_TeamNone;
 	
+	CubeHealth = 250.f;
+	CubeMaxHealth = 250.f;
+	
 }
 
 // Called when the game starts or when spawned
@@ -67,6 +70,8 @@ void ACubeBomb::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 
 	DOREPLIFETIME(ACubeBomb, bISTriggered);
 	DOREPLIFETIME(ACubeBomb, PullablePlayers);
+	DOREPLIFETIME(ACubeBomb, CubeHealth);
+	DOREPLIFETIME(ACubeBomb, CubeMaxHealth);
 	
 }
 
@@ -222,6 +227,34 @@ void ACubeBomb::ToggleGravPullForEachPlayer(bool bEnable)
 		{
 			Character->bEnableGravPull = bEnable;
 		}
+	}
+}
+
+void ACubeBomb::DestroyCube()
+{
+	if(HasAuthority())
+	{
+		GetWorldTimerManager().ClearAllTimersForObject(this);
+		this->Destroy();
+	}
+}
+
+void ACubeBomb::SetObjectHealth(float newHealth)
+{
+	
+	float hp = FMath::Clamp(newHealth, 0.f, CubeMaxHealth);
+	CubeHealth = hp;
+	if(CubeHealth <= 0.f)
+	{
+		DestroyCube();
+	}
+}
+
+void ACubeBomb::ChangeObjectHealth(float deltaHealth)
+{
+	if(HasAuthority())
+	{
+		SetObjectHealth(CubeHealth + deltaHealth);
 	}
 }
 
