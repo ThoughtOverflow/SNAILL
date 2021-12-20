@@ -56,7 +56,8 @@ void AProjectile::OnImpact(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 					//Destroy();
 					UE_LOG(LogTemp, Warning, TEXT("Calling Damage Handler"));
 					Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), OtherActor, projectileDamage, bCanDamageAllies);
-					this->Destroy();
+					// this->Destroy();
+					TryDestroy();
 			}
 		}	 
 	
@@ -66,17 +67,20 @@ void AProjectile::OnBlock(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Block Destroy"));
+	TryDestroy();
+}
+
+void AProjectile::TryDestroy()
+{
 	if(HasAuthority())
 	{
-		if(WeaponBase && OtherActor != GetInstigator())
-		{
-			//OtherActor->Destroy();
-			//Destroy();
-			UE_LOG(LogTemp, Warning, TEXT("Calling Damage Handler"));
-			Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->ProjectileHit(WeaponBase->GetOwner(), OtherActor, projectileDamage, bCanDamageAllies);
-			this->Destroy();
-		}
+		GetWorldTimerManager().SetTimer(DestroyDelayHandle, this, &AProjectile::Handle_Destroyed, 0.01f, false);
 	}
+}
+
+void AProjectile::Handle_Destroyed()
+{
+	this->Destroy();
 }
 
 // Called every frame

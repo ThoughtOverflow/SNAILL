@@ -44,10 +44,16 @@ protected:
 	virtual void OnImpact(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	UFUNCTION()
 	virtual void OnBlock(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit );
+
+	UFUNCTION()
+		void TryDestroy();
+	FTimerHandle DestroyDelayHandle;
+	UFUNCTION()
+		void Handle_Destroyed();
+	
 	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-
+	
 };
