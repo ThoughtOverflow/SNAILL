@@ -31,6 +31,8 @@ public:
 	float TeleportTimerCooldown;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Teleport Properties", Replicated)
 	float TeleportPlacementCooldown;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Teleport Properties", Replicated)
+	float TeleportDelay;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Teleport Properties", ReplicatedUsing = OnRep_CanTeleport)
 	bool bCanTeleport;
 
@@ -38,6 +40,8 @@ public:
 	FTimerHandle TeleportTimerHandle;
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	FTimerHandle TeleportPlacementHandle;
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	FTimerHandle TeleportDelayHandle;
 
 protected:
 
@@ -68,6 +72,9 @@ public:
 		void TeleportTimerHit();
 	UFUNCTION()
 		void TeleportPlacementTimerHit();
+	UFUNCTION()
+		void TeleportDelayHit();
+	
 	UFUNCTION(Server, Reliable)
 		void AnchorPickedUp();
 
@@ -76,6 +83,19 @@ public:
 
 	UFUNCTION()
 		void OnRep_CanTeleport();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void PlayTeleportSound();
+
+	UFUNCTION(Client, Unreliable)
+		void Client_PlayRechargeSound();
+	UFUNCTION(BlueprintImplementableEvent)
+		void PlayRechargeSound();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void SpawnTeleportParticles();
+	UFUNCTION(BlueprintImplementableEvent)
+		void BP_SpawnTeleportParticles();
 		
 	
 };

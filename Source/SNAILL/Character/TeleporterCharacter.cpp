@@ -10,6 +10,7 @@ ATeleporterCharacter::ATeleporterCharacter()
 	bCanTeleport = true;
     TeleportPlacementCooldown = 10.f;
     TeleportTimerCooldown = 5.f;
+	TeleportDelay = 0.7f;
 }
 
 void ATeleporterCharacter::BeginPlay()
@@ -36,6 +37,8 @@ void ATeleporterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(ATeleporterCharacter, TeleportTimerCooldown);
 	DOREPLIFETIME(ATeleporterCharacter, TeleportPlacementHandle);
 	DOREPLIFETIME(ATeleporterCharacter, TeleportTimerHandle);
+	DOREPLIFETIME(ATeleporterCharacter, TeleportDelay);
+	DOREPLIFETIME(ATeleporterCharacter, TeleportDelayHandle);
 	
 }
 
@@ -86,15 +89,17 @@ void ATeleporterCharacter::Server_TeleportToAnchor_Implementation()
 
 bool ATeleporterCharacter::TeleportToAnchor()
 {
-
+	PlayTeleportSound();
 	if(!HasAuthority())
 	{
 		Server_TeleportToAnchor();
 	}else
 	{
-		TeleportFX();
-		SetActorLocation(SpawnedAnchor->GetActorLocation());
-		GetWorldTimerManager().SetTimer(TeleportTimerHandle, this, &ATeleporterCharacter::TeleportTimerHit, TeleportTimerCooldown, false);
+		GetWorldTimerManager().SetTimer(TeleportDelayHandle, this, &ATeleporterCharacter::TeleportDelayHit, TeleportDelay, false);
+		// GetMesh()->SetVisibility(false);
+		// CurrentWeapon->WeaponMeshComponent->SetVisibility(false);
+		// GetController()->SetIgnoreMoveInput(true);
+		SpawnTeleportParticles();
 		bCanTeleport = false;
 		OnRep_CanTeleport();
 		return true;
@@ -134,6 +139,7 @@ void ATeleporterCharacter::TeleportTimerHit()
 	bCanTeleport = true;
 	OnRep_CanTeleport();
 	Client_DisplayAlertMessage(FText::FromString("Teleport Ready"));
+	Client_PlayRechargeSound();
 }
 
 void ATeleporterCharacter::TeleportPlacementTimerHit()
@@ -142,6 +148,17 @@ void ATeleporterCharacter::TeleportPlacementTimerHit()
 	OnRep_CanTeleport();
 	bAnchorAvailable = true;
 	Client_DisplayAlertMessage(FText::FromString("Teleport Anchor Available"));
+	
+}
+
+void ATeleporterCharacter::TeleportDelayHit()
+{
+	TeleportFX();
+	SetActorLocation(SpawnedAnchor->GetActorLocation());
+	// GetMesh()->SetVisibility(true);
+	// CurrentWeapon->WeaponMeshComponent->SetVisibility(true);
+	// GetController()->SetIgnoreMoveInput(false);
+	GetWorldTimerManager().SetTimer(TeleportTimerHandle, this, &ATeleporterCharacter::TeleportTimerHit, TeleportTimerCooldown, false);
 }
 
 void ATeleporterCharacter::OnRep_CanTeleport()
@@ -149,6 +166,16 @@ void ATeleporterCharacter::OnRep_CanTeleport()
     if(SpawnedAnchor) {
 	SpawnedAnchor->ToggleTeleporterAvailabilty(bCanTeleport);
 	}
+}
+
+void ATeleporterCharacter::SpawnTeleportParticles_Implementation()
+{
+	BP_SpawnTeleportParticles();
+}
+
+void ATeleporterCharacter::Client_PlayRechargeSound_Implementation()
+{
+	PlayRechargeSound();
 }
 
 void ATeleporterCharacter::AnchorPickedUp_Implementation()
