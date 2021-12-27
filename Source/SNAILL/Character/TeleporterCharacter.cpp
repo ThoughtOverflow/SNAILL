@@ -10,7 +10,7 @@ ATeleporterCharacter::ATeleporterCharacter()
 	bCanTeleport = true;
     TeleportPlacementCooldown = 10.f;
     TeleportTimerCooldown = 5.f;
-	TeleportDelay = 0.7f;
+	TeleportDelay = 0.15f;
 }
 
 void ATeleporterCharacter::BeginPlay()
@@ -100,6 +100,7 @@ bool ATeleporterCharacter::TeleportToAnchor()
 		// CurrentWeapon->WeaponMeshComponent->SetVisibility(false);
 		// GetController()->SetIgnoreMoveInput(true);
 		SpawnTeleportParticles();
+		TeleportFX();
 		bCanTeleport = false;
 		OnRep_CanTeleport();
 		return true;
@@ -153,7 +154,6 @@ void ATeleporterCharacter::TeleportPlacementTimerHit()
 
 void ATeleporterCharacter::TeleportDelayHit()
 {
-	TeleportFX();
 	SetActorLocation(SpawnedAnchor->GetActorLocation());
 	// GetMesh()->SetVisibility(true);
 	// CurrentWeapon->WeaponMeshComponent->SetVisibility(true);

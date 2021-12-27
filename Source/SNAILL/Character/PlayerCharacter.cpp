@@ -707,6 +707,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("ActivateShield", IE_Pressed, this, &APlayerCharacter::EnableShield);
 	PlayerInputComponent->BindAction("ToggleBomb", IE_Pressed, this, &APlayerCharacter::PlaceBomb);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &APlayerCharacter::Reload);
+	PlayerInputComponent->BindAction("DebugSuicide", IE_Pressed, this, &APlayerCharacter::DebugSuicide);
 
 }
 
@@ -870,6 +871,30 @@ void APlayerCharacter::Server_TMP_Implementation()
 }
 
 
+void APlayerCharacter::NetPlaySoundAtSocket(FName Socket, USoundBase* Sound)
+{
+	if(HasAuthority())
+	{
+		Multicast_PlaySoundAtSocket(Socket, Sound);
+	}else
+	{
+		Server_PlaySoundAtSocket(Socket, Sound);
+	}
+}
+
+void APlayerCharacter::Multicast_PlaySoundAtSocket_Implementation(FName Socket, USoundBase* Sound)
+{
+	if(DefaultSoundAttenuation!=nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, GetMesh()->GetSocketLocation(Socket), 1, 1, 0, DefaultSoundAttenuation);
+	}
+}
+
+void APlayerCharacter::Server_PlaySoundAtSocket_Implementation(FName Socket, USoundBase* Sound)
+{
+	NetPlaySoundAtSocket(Socket, Sound);
+}
+
 void APlayerCharacter::SetObjectHealth(float newHealth)
 {
 	SetPlayerHealth(newHealth);
@@ -878,6 +903,29 @@ void APlayerCharacter::SetObjectHealth(float newHealth)
 void APlayerCharacter::ChangeObjectHealth(float deltaHealth)
 {
 	ChangePlayerHealth(deltaHealth);
+}
+
+void APlayerCharacter::DebugSuicide()
+{
+	if(HasAuthority())
+	{
+		//Suicide:
+		UE_LOG(LogNet, Error, TEXT("Hit Debug Suicide button. - Respawning..."))
+		if(!bIsPlayerDead)
+		{
+			
+		}
+		Cast<ASNAILLGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->Respawn(TryGetPlayerController());
+		
+	}else
+	{
+		Server_DebugSuicide();
+	}
+}
+
+void APlayerCharacter::Server_DebugSuicide_Implementation()
+{
+	DebugSuicide();
 }
 
 

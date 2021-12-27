@@ -112,6 +112,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated)
 		bool bIsReloading;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		USoundAttenuation* DefaultSoundAttenuation;
+
 	
 	
 protected:
@@ -284,11 +287,23 @@ public:
 	void Client_DisplaySnailCollectorAvailability();
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void Client_DisplayAlertMessage(const FText& AlertMessage);
+	
+	UFUNCTION(BlueprintCallable)
+	    void NetPlaySoundAtSocket(FName Socket, USoundBase* Sound);
+	UFUNCTION(NetMulticast, Reliable)
+		void Multicast_PlaySoundAtSocket(FName Socket, USoundBase* Sound);
+	UFUNCTION(Server, Reliable)
+		void Server_PlaySoundAtSocket(FName Socket, USoundBase* Sound);
 
 	UFUNCTION(BlueprintCallable)
 	virtual void SetObjectHealth(float newHealth) override;
 	UFUNCTION(BlueprintCallable)
 	virtual void ChangeObjectHealth(float deltaHealth) override;
+
+	UFUNCTION(BlueprintCallable)
+		void DebugSuicide();
+	UFUNCTION(Server, Reliable)
+		void Server_DebugSuicide();
 	
 
 };
