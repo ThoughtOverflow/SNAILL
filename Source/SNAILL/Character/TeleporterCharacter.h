@@ -57,6 +57,7 @@ protected:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 		void Server_TeleportToAnchor();
 
+	virtual void SetPlayerHealth(float newHealth) override;
 
 public:
 
@@ -96,6 +97,5 @@ public:
 		void SpawnTeleportParticles();
 	UFUNCTION(BlueprintImplementableEvent)
 		void BP_SpawnTeleportParticles();
-		
 	
 };

@@ -266,7 +266,7 @@ public:
 	void Client_ChangeWalkSpeed(float newWalkSpeed);
 
 	UFUNCTION(BlueprintCallable)
-		void SetPlayerHealth(float newHealth);
+		virtual void SetPlayerHealth(float newHealth);
 	UFUNCTION(BlueprintCallable)
 		void ChangePlayerHealth(float deltaHealth);
 	UFUNCTION(BlueprintGetter)

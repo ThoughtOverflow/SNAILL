@@ -87,6 +87,17 @@ void ATeleporterCharacter::Server_TeleportToAnchor_Implementation()
 	TeleportToAnchor();
 }
 
+void ATeleporterCharacter::SetPlayerHealth(float newHealth)
+{
+	if(HasAuthority())
+	{
+		if(playerHealth<=0.f)
+		{
+			SpawnedAnchor->Destroy();
+		}
+	}
+}
+
 bool ATeleporterCharacter::TeleportToAnchor()
 {
 	PlayTeleportSound();
