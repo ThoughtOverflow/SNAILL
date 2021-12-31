@@ -24,7 +24,7 @@ void UPlayerSpecInteractionComponent::BeginFocus(APawn* Interactor)
 
 	if(APlayerCharacter* InteractorCharacter = Cast<APlayerCharacter>(Interactor))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Added One: %s, Looking One: %s"), AllowedInteractors[0]->HasAuthority() ? TEXT("YES") : TEXT("NO"), InteractorCharacter->HasAuthority() ? TEXT("YES"): TEXT("NO"));
+		// UE_LOG(LogTemp, Warning, TEXT("Added One: %s, Looking One: %s"), AllowedInteractors[0]->HasAuthority() ? TEXT("YES") : TEXT("NO"), InteractorCharacter->HasAuthority() ? TEXT("YES"): TEXT("NO"));
 		// UE_LOG(LogTemp, Warning, TEXT("We have auth: %s, Array Length: %d"), Interactor->HasAuthority() ? TEXT("YES") : TEXT("NO"), Cast<UPlayerSpecInteractionComponent>(InteractorCharacter->InteractionData.LastViewedInteractionComponent)->AllowedInteractors.Num());
 		if(AllowedInteractors.Contains(InteractorCharacter))
 		{
