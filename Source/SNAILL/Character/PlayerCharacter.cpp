@@ -66,6 +66,12 @@ APlayerCharacter::APlayerCharacter()
 	GravPushDirection = FVector::ZeroVector;
 	GravPushPower = 0.0f;
 
+	ThrowableSlot = CreateDefaultSubobject<USphereComponent>(TEXT("ThrowableSlot"));
+	ThrowableSlot->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepWorldTransform, FName("throwable_socket"));
+	// ThrowableSlot->SetupAttachment(GetRootComponent());
+	ThrowableSlot->SetSphereRadius(50.f);
+	bThrowableEquipped = false;
+
 	//----------------------------------------------------
 
 	//DEBUG:
@@ -114,6 +120,8 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(APlayerCharacter, bIsSnailCollectorAvailable);
 	DOREPLIFETIME(APlayerCharacter, SnailCollectorKillRegistry);
 	DOREPLIFETIME(APlayerCharacter, bIsReloading);
+	DOREPLIFETIME(APlayerCharacter, bThrowableEquipped);
+	DOREPLIFETIME(APlayerCharacter, ThrowableAnimReplicator);
 	
 }
 
@@ -191,6 +199,7 @@ void APlayerCharacter::StartSuperchargeTimer_Implementation()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 	
 	CheckInteractable();
 	
@@ -338,6 +347,64 @@ void APlayerCharacter::EndInteractFocus()
 	}
 }
 
+void APlayerCharacter::EquipThrowable()
+{
+	if(!HasAuthority())
+	{
+		Server_EquipThrowable();
+		return;
+	}
+
+	if(bThrowableEquipped)
+	{
+		UnequipThrowable();
+		return;
+	}
+
+	PlayThrowableAnimation(EThrowableAnimType::PLAY_INIT);
+
+	UE_LOG(LogTemp, Warning, TEXT("Spawning Actor: %s"), *ThrowableSlot->GetComponentLocation().ToString());
+	if(SignatureThrowable)
+	{
+		SpawnedThrowable = GetWorld()->SpawnActor<AThrowable>(SignatureThrowable, ThrowableSlot->GetComponentLocation(), FRotator(0.f, GetControlRotation().Yaw,0.f));
+		SpawnedThrowable->OwningCharacter = this;
+		SpawnedThrowable->AttachToComponent(ThrowableSlot, FAttachmentTransformRules::KeepWorldTransform);
+		bThrowableEquipped = true;
+		CurrentWeapon->HolsterWeapon(true);
+	}
+
+	
+}
+
+void APlayerCharacter::UnequipThrowable()
+{
+	if(!HasAuthority())
+	{
+		Server_UnequipThrowable();
+		return;
+	}
+
+	PlayThrowableAnimation(EThrowableAnimType::STOP_ANIM);
+	
+	if(SpawnedThrowable)
+	{
+		SpawnedThrowable->Destroy();
+		bThrowableEquipped = false;
+		CurrentWeapon->HolsterWeapon(false);
+	}
+	
+}
+
+void APlayerCharacter::Server_EquipThrowable_Implementation()
+{
+	EquipThrowable();
+}
+
+void APlayerCharacter::Server_UnequipThrowable_Implementation()
+{
+	UnequipThrowable();
+}
+
 
 void APlayerCharacter::BeginInteract()
 {
@@ -372,10 +439,22 @@ void APlayerCharacter::BeginShooting()
 		Server_BeginShooting();
 	}else
 	{
-			
-		if(CurrentWeapon)
+		if(bThrowableEquipped)
 		{
-			CurrentWeapon->BeginShooting();
+
+			if(SpawnedThrowable)
+			{
+				PlayThrowableAnimation(EThrowableAnimType::PLAY_THROW);
+				OnRep_ThrowableAnimType();
+				SpawnedThrowable->ShootThrowable();
+			}
+			
+		}else
+		{
+			if(CurrentWeapon)
+			{
+				CurrentWeapon->BeginShooting();
+			}
 		}
 	}
 
@@ -682,6 +761,22 @@ void APlayerCharacter::OnRep_IsPlayerDead()
 	}
 }
 
+void APlayerCharacter::OnRep_ThrowableAnimType()
+{
+	switch (ThrowableAnimReplicator)
+	{
+	case EThrowableAnimType::PLAY_INIT:
+		PrepareThrowableAnim();
+		break;
+	case EThrowableAnimType::PLAY_THROW:
+		ThrowThrowableAnim();
+		break;
+	case EThrowableAnimType::STOP_ANIM:
+		StopThrowableAnim();
+		break;
+	}
+}
+
 // Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -708,6 +803,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("ToggleBomb", IE_Pressed, this, &APlayerCharacter::PlaceBomb);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &APlayerCharacter::Reload);
 	PlayerInputComponent->BindAction("DebugSuicide", IE_Pressed, this, &APlayerCharacter::DebugSuicide);
+	PlayerInputComponent->BindAction("EquipThrowable", IE_Pressed, this, &APlayerCharacter::EquipThrowable);
 
 }
 
@@ -920,6 +1016,24 @@ void APlayerCharacter::DebugSuicide()
 	}else
 	{
 		Server_DebugSuicide();
+	}
+}
+
+void APlayerCharacter::PlayThrowableAnimation_Implementation(EThrowableAnimType Anim)
+{
+	ThrowableAnimReplicator = Anim;
+	
+	switch (Anim)
+	{
+		case EThrowableAnimType::PLAY_INIT:
+			PrepareThrowableAnim();		
+		break;
+		case EThrowableAnimType::PLAY_THROW:
+			ThrowThrowableAnim();
+		break;
+		case EThrowableAnimType::STOP_ANIM:
+			StopThrowableAnim();
+		break;
 	}
 }
 

@@ -49,6 +49,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties", meta = (ClampMin = 0.0f, ClampMax = 1.0f))
 		float reloadAlertPercentage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_Holster)
+		bool bIsWeaponHolstered;
 	
 	UFUNCTION()
 		void OnRep_AmmoCount();
@@ -81,6 +84,11 @@ protected:
 	UFUNCTION()
 		void ReloadTimerHit();
 
+	UFUNCTION()
+		void OnRep_Holster();
+	UFUNCTION()
+		void HolsterWeapon_Internal(bool bHolster);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -98,5 +106,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		bool TryReload();
+	UFUNCTION(BlueprintCallable)
+		void HolsterWeapon(bool bHolster);
+	UFUNCTION(Server, Reliable)
+		void Server_HolsterWeapon(bool bHolster);
 	
 };

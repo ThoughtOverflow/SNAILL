@@ -8,7 +8,9 @@
 #include "SNAILL/Components/PlayerNameTag.h"
 #include "SNAILL/Enums/ESuperchargeState.h"
 #include "SNAILL/Framework/SNAILLPlayerController.h"
+#include "SNAILL/Gameplay/Enums/EThrowableAnimType.h"
 #include "SNAILL/Gameplay/Placeables/CubeBomb.h"
+#include "SNAILL/Gameplay/Weapons/Throwable.h"
 #include "SNAILL/Gameplay/Weapons/WeaponBase.h"
 #include "SNAILL/Interfaces/DamageHandler.h"
 
@@ -115,6 +117,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		USoundAttenuation* DefaultSoundAttenuation;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		TSubclassOf<AThrowable> SignatureThrowable;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		AThrowable* SpawnedThrowable;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		USphereComponent* ThrowableSlot;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated)
+		bool bThrowableEquipped;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_ThrowableAnimType);
+		EThrowableAnimType ThrowableAnimReplicator;
 	
 	
 protected:
@@ -214,6 +227,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void EndInteractFocus();
 
+
+	UFUNCTION()
+		void EquipThrowable();
+	UFUNCTION()
+		void UnequipThrowable();
+
+	UFUNCTION(Server, Reliable)
+		void Server_EquipThrowable();
+	UFUNCTION(Server, Reliable)
+		void Server_UnequipThrowable();
 	
 	UFUNCTION(Server, Reliable)
 		void Server_BeginInteract();
@@ -246,6 +269,9 @@ public:
 		void OnRep_PlayerMaxHealth();
 	UFUNCTION()
 		void OnRep_IsPlayerDead();
+
+	UFUNCTION()
+		void OnRep_ThrowableAnimType();
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -304,6 +330,16 @@ public:
 		void DebugSuicide();
 	UFUNCTION(Server, Reliable)
 		void Server_DebugSuicide();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void PrepareThrowableAnim();
+	UFUNCTION(BlueprintImplementableEvent)
+		void ThrowThrowableAnim();
+	UFUNCTION(BlueprintImplementableEvent)
+		void StopThrowableAnim();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+		void PlayThrowableAnimation(EThrowableAnimType Anim);
 	
 
 };

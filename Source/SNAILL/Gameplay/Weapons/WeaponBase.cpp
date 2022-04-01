@@ -251,6 +251,24 @@ bool AWeaponBase::TryReload()
 	return false;
 }
 
+void AWeaponBase::HolsterWeapon(bool bHolster)
+{
+	if(!HasAuthority())
+	{
+		Server_HolsterWeapon(bHolster);
+	}else
+	{
+		bIsWeaponHolstered = bHolster;
+		OnRep_Holster();
+		bCanWeaponShoot = !bHolster;
+	}
+}
+
+void AWeaponBase::Server_HolsterWeapon_Implementation(bool bHolster)
+{
+	HolsterWeapon(bHolster);
+}
+
 void AWeaponBase::ReloadTimerHit()
 {
 	if(TotalAmmo > ammoDiff)
@@ -270,5 +288,15 @@ void AWeaponBase::ReloadTimerHit()
 		OwningPlayer->bIsReloading = false;
 	}
 	
+}
+
+void AWeaponBase::OnRep_Holster()
+{
+	HolsterWeapon_Internal(bIsWeaponHolstered);
+}
+
+void AWeaponBase::HolsterWeapon_Internal(bool bHolster)
+{
+	SetActorHiddenInGame(bHolster);
 }
 
