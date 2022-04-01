@@ -11,6 +11,8 @@
 #include "SNAILL/Gameplay/Placeables/CubeBomb.h"
 #include "SNAILL/Gameplay/Weapons/WeaponBase.h"
 #include "SNAILL/Interfaces/DamageHandler.h"
+#include "MediaAssets/Public/MediaPlayer.h"
+#include "MediaAssets/Public/MediaSoundComponent.h"
 
 #include "PlayerCharacter.generated.h"
 
@@ -304,6 +306,22 @@ public:
 		void DebugSuicide();
 	UFUNCTION(Server, Reliable)
 		void Server_DebugSuicide();
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UMediaSoundComponent* SC;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UMediaPlayer* MediaPlayer;
 	
+	
+	UFUNCTION(BlueprintCallable)
+		void OnHotkeyPressed();
+
+	UPROPERTY(BlueprintReadOnly)
+		bool bShouldDisplay;
+
+	UFUNCTION()
+		void DoTheCollection();
 
 };

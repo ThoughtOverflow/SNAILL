@@ -9,6 +9,7 @@
 #include "SNAILL/UMG/UserWidgets/TeamSelectionWidget.h"
 #include "SNAILL/UMG/UserWidgets/PlayerDeathWidget.h"
 #include "SNAILL/UMG/UserWidgets/GameEndWidget.h"
+#include "SNAILL/UMG/UserWidgets/PopupWidget.h"
 
 #include "SNAILLPlayerController.generated.h"
 
@@ -62,6 +63,24 @@ class SNAILL_API ASNAILLPlayerController : public APlayerController
 		void Client_DoRotationVertical(float val);
 	UFUNCTION(Client, Reliable)
 		void Client_RefreshPlayerAmmoCount(float clipAmmo, float totalAmmo);
+
+
+
+	UFUNCTION(BlueprintCallable)
+		void DoTheThing(bool bDo);
+
+	UFUNCTION(Client, Reliable)
+		void DoTheClientThing(bool bDo);
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TSubclassOf<UPopupWidget> Thing;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPopupWidget* ThingWidget;
+
+
+	
+	
 
 protected:
 

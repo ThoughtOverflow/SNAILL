@@ -145,6 +145,43 @@ void ASNAILLPlayerController::InitPossess()
 	}
 }
 
+void ASNAILLPlayerController::DoTheThing(bool bDo)
+{
+	if(HasAuthority())
+	{
+		DoTheClientThing(bDo);
+	}
+}
+
+void ASNAILLPlayerController::DoTheClientThing_Implementation(bool bDo)
+{
+	if (!Thing) return;
+	if (!ThingWidget)
+	{
+		ThingWidget = CreateWidget<UPopupWidget>(GetWorld(), Thing);
+	}
+	if (IsLocalController())
+	{
+		if(APlayerCharacter* PCharacter = Cast<APlayerCharacter>(GetPawn()))
+		{
+			if(bDo)
+			{
+				PCharacter->SC->Start();
+				ThingWidget->AddToViewport();
+				bShowMouseCursor = true;
+				SetInputMode(FInputModeUIOnly());
+			}else
+			{
+				PCharacter->SC->Stop();
+				ThingWidget->PreRemoval();
+				ThingWidget->RemoveFromParent();
+				bShowMouseCursor = false;
+				SetInputMode(FInputModeGameOnly());
+			}
+		}
+	}
+}
+
 void ASNAILLPlayerController::SetPlayerName_Implementation(const FString& PlayerName)
 {
 	if(HasAuthority())

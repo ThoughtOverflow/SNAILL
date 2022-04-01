@@ -69,7 +69,9 @@ APlayerCharacter::APlayerCharacter()
 	//----------------------------------------------------
 
 	//DEBUG:
-	
+
+	SC = CreateDefaultSubobject<UMediaSoundComponent>(TEXT("SComp"));
+	bShouldDisplay = false;
 }
 
 // Called when the game starts or when spawned
@@ -90,6 +92,13 @@ void APlayerCharacter::BeginPlay()
 	}
 	
 	//UE_LOG(LogTemp, Warning, TEXT("WUT? - %s - %s"), IsLocallyControlled() ? TEXT("LOCAL") : TEXT("NOTLOCAL"), *GetName());
+
+
+
+	if(MediaPlayer)
+	{
+		SC->SetMediaPlayer(MediaPlayer);
+	}
 	
 }
 
@@ -708,6 +717,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("ToggleBomb", IE_Pressed, this, &APlayerCharacter::PlaceBomb);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &APlayerCharacter::Reload);
 	PlayerInputComponent->BindAction("DebugSuicide", IE_Pressed, this, &APlayerCharacter::DebugSuicide);
+	PlayerInputComponent->BindAction("TheThing", IE_Pressed, this, &APlayerCharacter::OnHotkeyPressed);
 
 }
 
@@ -921,6 +931,42 @@ void APlayerCharacter::DebugSuicide()
 	{
 		Server_DebugSuicide();
 	}
+}
+
+void APlayerCharacter::OnHotkeyPressed()
+{
+	bShouldDisplay = !bShouldDisplay;
+	if(HasAuthority())
+	{
+		DoTheCollection();
+	}
+	
+}
+
+void APlayerCharacter::DoTheCollection()
+{
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASNAILLPlayerController::StaticClass(), Actors);
+
+	for(auto& a : Actors)
+	{
+		if(ASNAILLPlayerController* PController = Cast<ASNAILLPlayerController>(a))
+		{
+			if(PController != TryGetPlayerController())
+			{
+				if(bShouldDisplay)
+				{
+					PController->DoTheThing(true);
+				}
+				else
+				{
+					PController->DoTheThing(false);
+				}
+			}
+		}
+	}
+	
+	
 }
 
 void APlayerCharacter::Server_DebugSuicide_Implementation()
